@@ -117,3 +117,47 @@ section { padding: 88px 0; }
 }
 
 section { scroll-margin-top: 80px; }
+
+/* ============ Hero ============ */
+#hero { padding: 150px 0 90px; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+.hero-kicker { font-family: var(--mono); color: var(--cyan); font-size: 14px; margin-bottom: 14px; }
+.hero-title { font-size: clamp(34px, 5vw, 56px); margin-bottom: 18px; }
+.grad {
+  background: linear-gradient(120deg, var(--accent) 10%, var(--cyan) 90%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.hero-sub { color: var(--text-dim); font-family: var(--mono); font-size: 15px; margin-bottom: 28px; }
+.hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+
+/* Terminal window */
+.terminal {
+  background: var(--bg-terminal); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), var(--glow);
+  overflow: hidden; font-family: var(--mono); font-size: 13.5px;
+}
+.terminal-bar {
+  display: flex; align-items: center; gap: 7px; padding: 10px 14px;
+  background: #0b1524; border-bottom: 1px solid var(--line);
+}
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot-r { background: var(--danger); } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
+.terminal-title { margin-left: 8px; color: var(--text-dim); font-size: 12px; }
+.terminal-body { padding: 18px 18px 22px; min-height: 320px; }
+.t-line { white-space: pre-wrap; line-height: 1.7; }
+.t-prompt { color: var(--accent); font-weight: 700; }
+.t-cmd { color: #fff; }
+.t-out { color: var(--text-dim); }
+.t-table { color: var(--text); }
+.t-ok { color: var(--accent); }
+.t-cursor {
+  display: inline-block; width: 9px; height: 17px; vertical-align: -3px;
+  background: var(--accent); animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  #hero { padding-top: 120px; }
+}
