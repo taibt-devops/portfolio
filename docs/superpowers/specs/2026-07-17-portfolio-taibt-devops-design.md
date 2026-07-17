@@ -36,7 +36,7 @@ Core message, drawn from the CV: *"I build and run cloud infrastructure at scale
 
 1. **Nav** — fixed, translucent blur when scrolled; brand `taibt@devops:~$`; anchor links; **Download CV** button.
 2. **Hero terminal** — macOS-style terminal window that auto-types a sequence: `whoami` → `cat summary.txt` → `kubectl get skills` (tabular output revealed line-by-line); blinking cursor; CTA buttons `[VIEW PROJECTS]` and `[HIRE ME]`.
-3. **Stats bar** — count-up on scroll: `5+ years` · `20+ production projects` · `4 clouds` · `150+ K8s nodes`.
+3. **Stats bar** — count-up on scroll: `5+ years` · `20+ production projects` · `4 clouds` · `100+ K8s nodes` (per CV: auto-scaling 90→150).
 4. **About** — short bio rendered as `cat about.md`, avatar/photo.
 5. **Skills** — 8 grouped cards (Cloud, Kubernetes, CI/CD & GitOps, IaC, Observability, Security/DevSecOps, Data & Messaging, Dev) with real tech logos (devicon SVGs, inlined or self-hosted) and hover glow.
 6. **Experience** — vertical timeline styled as `git log`: each role is a "commit" (fake hash, date range, company, 2–4 highlight bullets). Entries: MTL Technology (08/2024–present), Rikkei Software (02–07/2024), Synodus (12/2022–01/2024), FPT Software (01/2021–12/2022), Freelance (2019–2020).
