@@ -4,6 +4,8 @@
  *   data-reveal                 -> fade/slide in when 15% visible
  *   data-reveal-delay="200"     -> stagger (ms)
  *   data-count-to="100"         -> count text content from 0 to N on reveal
+ *   NOTE: data-count-to must be on a DESCENDANT of the data-reveal element,
+ *   not on the same node (reveal only scans descendants for counters).
  * Reduced motion: elements stay visible, counters show final values (we do nothing).
  */
 (() => {
@@ -14,6 +16,7 @@
 
   const countUp = (el) => {
     const target = parseInt(el.dataset.countTo, 10);
+    if (Number.isNaN(target)) return;
     const dur = 900;
     const t0 = performance.now();
     const tick = (t) => {
