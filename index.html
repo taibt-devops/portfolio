@@ -198,10 +198,10 @@
         <div class="work-grid">
           <article class="work-card" data-reveal>
             <span class="work-type work-type-incident">INCIDENT RESPONSE</span>
-            <h3>The database that shouldn't have been reachable</h3>
-            <p>Found a legacy MySQL on EKS quietly exposed to the internet through a public NLB (ap-northeast-1). Recovered data from binary logs + EBS snapshots, then closed the hole for good: ClusterIP conversion, Security Group lockdown.</p>
-            <p class="work-impact"><span aria-hidden="true">└─</span> impact: zero data loss · exposure eliminated</p>
-            <p class="work-stack">AWS · EKS · NLB · MySQL · binlog · EBS</p>
+            <h3>One port-scan away from a breach headline</h3>
+            <p>Found a legacy MySQL on EKS exposed to the internet through a public NLB (ap-northeast-1). Recovered data from binary logs + EBS snapshots, converted the service to ClusterIP, locked down Security Groups — then made it systemic: Gitleaks in every pre-commit, Trivy scanning every image in CI.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: zero data loss · security gates now org-wide</p>
+            <p class="work-stack">AWS · EKS · MySQL · binlog · Trivy · Gitleaks</p>
           </article>
           <article class="work-card" data-reveal data-reveal-delay="80">
             <span class="work-type work-type-scale">SCALE</span>
