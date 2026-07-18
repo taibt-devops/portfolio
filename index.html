@@ -181,7 +181,50 @@
         </ol>
       </div>
     </section>
-    <section id="work" aria-label="Featured work"><!-- Task 8 --></section>
+    <section id="work" aria-label="Featured work">
+      <div class="wrap">
+        <p class="section-title">ls -la ./featured-work</p>
+        <h2 class="section-heading">Featured Work</h2>
+        <div class="work-grid">
+          <article class="work-card" data-reveal>
+            <span class="work-type work-type-incident">INCIDENT RESPONSE</span>
+            <h3>MySQL exposed via public NLB — found, recovered, hardened</h3>
+            <p>Discovered a legacy MySQL on EKS reachable from the internet (ap-northeast-1). Recovered data using binary logs + EBS snapshots, converted the service to ClusterIP and locked down Security Groups. Zero data loss.</p>
+            <p class="work-stack">AWS · EKS · NLB · MySQL · binlog · EBS</p>
+          </article>
+          <article class="work-card" data-reveal data-reveal-delay="80">
+            <span class="work-type">PLATFORM</span>
+            <h3>Observability platform with SLO &amp; burn-rate alerting</h3>
+            <p>Designed the org-wide observability stack: OpenTelemetry pipelines into Prometheus/Grafana with SLO error-budget dashboards and multi-window burn-rate alerts for proactive incident detection.</p>
+            <p class="work-stack">OpenTelemetry · Prometheus · Grafana · Loki</p>
+          </article>
+          <article class="work-card" data-reveal data-reveal-delay="160">
+            <span class="work-type">ARCHITECTURE</span>
+            <h3>EKS multi-tenant networking with TargetGroupBinding</h3>
+            <p>NLB sharing across namespaces via TargetGroupBinding, autoscaling node groups and spot-instance strategies — standardized through org-wide Helm chart patterns.</p>
+            <p class="work-stack">EKS · Helm · ArgoCD · autoscaling node groups</p>
+          </article>
+          <article class="work-card" data-reveal>
+            <span class="work-type">TOOLING</span>
+            <h3>aws-ops — multi-account automation toolkit</h3>
+            <p>Custom IaC automation with a three-tier permission model, auto-discovery scripts and MCP integrations (GitLab, Google Docs, DBHub) to streamline operations across AWS accounts.</p>
+            <p class="work-stack">Terraform · Bash · MCP · AWS Organizations</p>
+          </article>
+          <article class="work-card" data-reveal data-reveal-delay="80">
+            <span class="work-type work-type-dev">FULL-STACK</span>
+            <h3>INFAXIA gaming platform — CRA → Next.js 14 migration</h3>
+            <p>Led the frontend migration for a Web3 gaming platform: Web3Auth, MetaMask, WalletConnect, ethers, Redux (14 slices), styled-components, antd v4.</p>
+            <p class="work-stack">Next.js 14 · TypeScript · Web3 · Redux</p>
+          </article>
+          <article class="work-card" data-reveal data-reveal-delay="160">
+            <span class="work-type work-type-dev">FULL-STACK</span>
+            <h3>BibleQuiz — non-profit Vietnamese quiz platform</h3>
+            <p>Co-developed end-to-end: Java 17 / Spring Boot 3.3 backend (~75 endpoints, ~30 tables, ~370 tests) with React 18 + Vite 5 + TypeScript frontend.</p>
+            <p class="work-stack">Java 17 · Spring Boot 3 · React 18 · Vite</p>
+          </article>
+        </div>
+      </div>
+    </section>
     <section id="contact" aria-label="Contact"><!-- Task 9 --></section>
   </main>
   <footer id="site-footer"><!-- Task 9 --></footer>

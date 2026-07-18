@@ -248,3 +248,24 @@ section { scroll-margin-top: 80px; }
 .commit-loc { font-family: var(--mono); font-size: 13px; color: var(--text-dim); font-weight: 400; }
 .commit ul { padding-left: 20px; color: var(--text-dim); }
 .commit ul li { margin-bottom: 6px; font-size: 15px; }
+
+/* ============ Featured work ============ */
+.work-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; perspective: 1200px; }
+.work-card {
+  background: var(--bg-raise); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 24px; transition: border-color 0.25s, box-shadow 0.25s;
+  transform-style: preserve-3d; will-change: transform;
+}
+.work-card:hover { border-color: var(--accent-dim); box-shadow: var(--glow); }
+.work-type {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  color: var(--cyan); border: 1px solid var(--cyan); border-radius: 4px; padding: 2px 8px;
+  display: inline-block; margin-bottom: 14px;
+}
+.work-type-incident { color: var(--danger); border-color: var(--danger); }
+.work-type-dev { color: var(--amber); border-color: var(--amber); }
+.work-card h3 { font-size: 17px; margin-bottom: 10px; }
+.work-card p { font-size: 14px; color: var(--text-dim); margin-bottom: 12px; }
+.work-stack { font-family: var(--mono); font-size: 12.5px; color: var(--accent-dim); }
+@media (max-width: 1000px) { .work-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .work-grid { grid-template-columns: 1fr; } }

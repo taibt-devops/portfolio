@@ -22,3 +22,18 @@
     if (e.key === 'Escape' && menu.classList.contains('open')) { setOpen(false); burger.focus(); }
   });
 })();
+
+// 3D tilt on work cards (pointer devices only; skipped for reduced motion)
+(() => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  document.querySelectorAll('.work-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `rotateY(${x * 8}deg) rotateX(${y * -8}deg) translateZ(4px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+})();
