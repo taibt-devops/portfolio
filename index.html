@@ -198,38 +198,44 @@
         <div class="work-grid">
           <article class="work-card" data-reveal>
             <span class="work-type work-type-incident">INCIDENT RESPONSE</span>
-            <h3>MySQL exposed via public NLB — found, recovered, hardened</h3>
-            <p>Discovered a legacy MySQL on EKS reachable from the internet (ap-northeast-1). Recovered data using binary logs + EBS snapshots, converted the service to ClusterIP and locked down Security Groups. Zero data loss.</p>
+            <h3>The database that shouldn't have been reachable</h3>
+            <p>Found a legacy MySQL on EKS quietly exposed to the internet through a public NLB (ap-northeast-1). Recovered data from binary logs + EBS snapshots, then closed the hole for good: ClusterIP conversion, Security Group lockdown.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: zero data loss · exposure eliminated</p>
             <p class="work-stack">AWS · EKS · NLB · MySQL · binlog · EBS</p>
           </article>
           <article class="work-card" data-reveal data-reveal-delay="80">
+            <span class="work-type work-type-scale">SCALE</span>
+            <h3>US banking platform serving 200K+ customers</h3>
+            <p>Ran infrastructure for a large-scale US banking platform: 150+ VMs and 100+ Kubernetes nodes, config-managed with Salt Stack and provisioned with Terraform across AWS and GCP. Peak-hour scaling events stayed invisible to users.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: 90→150 nodes at peak · zero downtime</p>
+            <p class="work-stack">AWS · GCP · K8s · Salt Stack · Terraform</p>
+          </article>
+          <article class="work-card" data-reveal data-reveal-delay="160">
             <span class="work-type">PLATFORM</span>
-            <h3>Observability platform with SLO &amp; burn-rate alerting</h3>
-            <p>Designed the org-wide observability stack: OpenTelemetry pipelines into Prometheus/Grafana with SLO error-budget dashboards and multi-window burn-rate alerts for proactive incident detection.</p>
+            <h3>Alerts that fire on user impact, not CPU spikes</h3>
+            <p>Built the org-wide observability stack on OpenTelemetry, Prometheus and Grafana. Alerting is SLO-driven — error budgets with multi-window burn-rate rules — so incidents surface proactively, not after the support tickets.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: SLO/error-budget standard across 20+ projects</p>
             <p class="work-stack">OpenTelemetry · Prometheus · Grafana · Loki</p>
           </article>
-          <article class="work-card" data-reveal data-reveal-delay="160">
-            <span class="work-type">ARCHITECTURE</span>
-            <h3>EKS multi-tenant networking with TargetGroupBinding</h3>
-            <p>NLB sharing across namespaces via TargetGroupBinding, autoscaling node groups and spot-instance strategies — standardized through org-wide Helm chart patterns.</p>
-            <p class="work-stack">EKS · Helm · ArgoCD · autoscaling node groups</p>
-          </article>
           <article class="work-card" data-reveal>
-            <span class="work-type">TOOLING</span>
-            <h3>aws-ops — multi-account automation toolkit</h3>
-            <p>Custom IaC automation with a three-tier permission model, auto-discovery scripts and MCP integrations (GitLab, Google Docs, DBHub) to streamline operations across AWS accounts.</p>
-            <p class="work-stack">Terraform · Bash · MCP · AWS Organizations</p>
+            <span class="work-type">ARCHITECTURE</span>
+            <h3>One NLB, many namespaces — multi-tenant EKS</h3>
+            <p>Designed EKS networking that shares a single NLB across namespaces via TargetGroupBinding, on autoscaling node groups with cost-optimized spot strategies — shipped org-wide as standard Helm chart patterns.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: shared load balancers · spot-optimized cost</p>
+            <p class="work-stack">EKS · Helm · ArgoCD · spot instances</p>
           </article>
           <article class="work-card" data-reveal data-reveal-delay="80">
-            <span class="work-type work-type-dev">FULL-STACK</span>
-            <h3>INFAXIA gaming platform — CRA → Next.js 14 migration</h3>
-            <p>Led the frontend migration for a Web3 gaming platform: Web3Auth, MetaMask, WalletConnect, ethers, Redux (14 slices), styled-components, antd v4.</p>
-            <p class="work-stack">Next.js 14 · TypeScript · Web3 · Redux</p>
+            <span class="work-type">PERFORMANCE</span>
+            <h3>XECA logistics — 35+ bus garages on GKE</h3>
+            <p>Provisioned the platform end-to-end with Terraform on GCP — GKE, Pub/Sub, MariaDB — and built the full CI/CD path from code scan to ArgoCD deploys. Then went bottleneck-hunting in production.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: +20% performance · −15% downtime</p>
+            <p class="work-stack">GCP · GKE · Terraform · Jenkins · ArgoCD</p>
           </article>
           <article class="work-card" data-reveal data-reveal-delay="160">
             <span class="work-type work-type-dev">FULL-STACK</span>
-            <h3>BibleQuiz — non-profit Vietnamese quiz platform</h3>
-            <p>Co-developed end-to-end: Java 17 / Spring Boot 3.3 backend (~75 endpoints, ~30 tables, ~370 tests) with React 18 + Vite 5 + TypeScript frontend.</p>
+            <h3>BibleQuiz — when DevOps ships the product too</h3>
+            <p>Co-developed a non-profit Vietnamese Bible quiz platform end-to-end: Java 17 / Spring Boot 3.3 backend, React 18 + Vite 5 + TypeScript frontend. Proof that "full-stack capable" on my CV isn't decoration.</p>
+            <p class="work-impact"><span aria-hidden="true">└─</span> impact: ~75 endpoints · ~30 tables · ~370 tests</p>
             <p class="work-stack">Java 17 · Spring Boot 3 · React 18 · Vite</p>
           </article>
         </div>

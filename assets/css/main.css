@@ -264,8 +264,11 @@ section { scroll-margin-top: 80px; }
 }
 .work-type-incident { color: var(--danger); border-color: var(--danger); }
 .work-type-dev { color: var(--amber); border-color: var(--amber); }
+.work-type-scale { color: var(--accent); border-color: var(--accent); }
 .work-card h3 { font-size: 17px; margin-bottom: 10px; }
 .work-card p { font-size: 14px; color: var(--text-dim); margin-bottom: 12px; }
+.work-impact { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.work-impact span { color: var(--text-dim); }
 .work-stack { font-family: var(--mono); font-size: 12.5px; color: var(--accent-dim); }
 @media (max-width: 1000px) { .work-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) { .work-grid { grid-template-columns: 1fr; } }
