@@ -227,3 +227,24 @@ section { scroll-margin-top: 80px; }
 .skill-card p { font-size: 13.5px; color: var(--text-dim); font-family: var(--mono); line-height: 1.7; }
 @media (max-width: 1000px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .skills-grid { grid-template-columns: 1fr; } }
+
+/* ============ Experience (git log) ============ */
+.timeline { list-style: none; padding: 0; position: relative; }
+.timeline::before {
+  content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px;
+  width: 2px; background: linear-gradient(var(--accent), var(--line));
+}
+.commit { position: relative; padding: 0 0 42px 40px; }
+.commit::before {
+  content: ""; position: absolute; left: 0; top: 6px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--bg); border: 3px solid var(--accent);
+}
+.commit-meta { display: flex; gap: 14px; align-items: center; font-family: var(--mono); font-size: 13px; margin-bottom: 6px; flex-wrap: wrap; }
+.hash { color: var(--amber); }
+.commit-date { color: var(--text-dim); }
+.tag { color: var(--cyan); border: 1px solid var(--cyan); border-radius: 4px; padding: 1px 8px; font-size: 12px; }
+.tag-init { color: var(--text-dim); border-color: var(--line); }
+.commit h3 { font-size: 19px; margin-bottom: 10px; }
+.commit-loc { font-family: var(--mono); font-size: 13px; color: var(--text-dim); font-weight: 400; }
+.commit ul { padding-left: 20px; color: var(--text-dim); }
+.commit ul li { margin-bottom: 6px; font-size: 15px; }
