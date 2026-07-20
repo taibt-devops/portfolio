@@ -4,3 +4,6 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Original uncropped photos (source files, not shipped)
+assets/img/my-image.jpg
