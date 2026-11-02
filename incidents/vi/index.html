@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sổ tay sự cố — Bùi Thanh Tài</title>
+  <meta name="description" content="Những sự cố production thật trên AWS, Kubernetes và Linux on-prem: triệu chứng, điều tra, nguyên nhân gốc, cách sửa và bài học. Bùi Thanh Tài, Senior DevOps Engineer.">
+  <link rel="icon" type="image/svg+xml" href="../../assets/img/favicon.svg">
+  <link rel="canonical" href="https://taibt-devops.github.io/portfolio/incidents/vi/">
+  <link rel="alternate" hreflang="en" href="https://taibt-devops.github.io/portfolio/incidents/">
+  <link rel="alternate" hreflang="vi" href="https://taibt-devops.github.io/portfolio/incidents/vi/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Sổ tay sự cố — Bùi Thanh Tài">
+  <meta property="og:description" content="12 sự cố production thật: cái gì hỏng, tìm nguyên nhân gốc thế nào, sửa ra sao và rút ra bài học gì.">
+  <meta property="og:image" content="https://taibt-devops.github.io/portfolio/assets/img/og-image.png">
+  <meta property="og:url" content="https://taibt-devops.github.io/portfolio/incidents/vi/">
+  <meta property="og:locale" content="vi_VN">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="../../assets/css/main.css">
+  <link rel="stylesheet" href="../../assets/css/incidents.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Bỏ qua tới nội dung</a>
+  <header id="site-nav">
+    <nav class="wrap nav-inner" aria-label="Main">
+      <a class="brand" href="../../">taibt<span class="brand-at">@devops</span><span class="brand-path">:~/incidents$</span></a>
+      <button type="button" class="nav-burger" aria-expanded="false" aria-controls="nav-menu" aria-label="Mở menu"><span></span><span></span><span></span></button>
+      <ul id="nav-menu" class="nav-links">
+        <li><a href="#approach">cách làm</a></li>
+        <li><a href="#index">sự cố</a></li>
+        <li><a href="#questions">câu hỏi</a></li>
+        <li><a href="../../">portfolio</a></li>
+        <li><a class="btn btn-ghost" href="../../cv/BUI_THANH_TAI_CV.pdf" download>tải cv</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="inc-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <p class="lang-switch"><a href="../" hreflang="en" lang="en">English</a><span aria-current="page">Tiếng Việt</span></p>
+        <p class="hero-kicker">// sổ tay sự cố · aws · kubernetes · linux</p>
+        <h1 id="page-title" class="inc-title">Những sự cố production tôi đã xử lý, <span class="grad">và bài học rút ra</span></h1>
+        <p class="inc-lede">12 sự cố thật trong quá trình vận hành AWS, Kubernetes và máy chủ Linux on-prem cho hơn 20 sản phẩm. Mỗi sự cố đi theo cùng một trình tự: triệu chứng, điều tra, nguyên nhân gốc, cách sửa và bài học. Kèm theo là bản kể trong 60 giây và những câu hỏi đào sâu mà người phỏng vấn hay hỏi.</p>
+        <p class="inc-note">Đã ẩn tên công ty, host và thông tin tài khoản. Số liệu là thật. Phỏng vấn bằng tiếng Anh thì luyện thêm với bản English.</p>
+      </div>
+    </section>
+
+    <section id="approach" class="inc-section" aria-labelledby="approach-title">
+      <div class="wrap">
+        <p class="section-title">cat approach.md</p>
+        <h2 id="approach-title" class="section-heading">Cách tôi xử lý một sự cố</h2>
+        <ol class="how-grid">
+          <li class="how-step"><h3>Phát hiện và khoanh vùng</h3><p>Cái gì hỏng, ai bị ảnh hưởng, từ lúc nào. Xem dashboard và alert, thống nhất một kênh xử lý sự cố.</p></li>
+          <li class="how-step"><h3>Ổn định trước</h3><p>Rollback, scale, failover hoặc thay pod hỏng. Người dùng trước, nguyên nhân gốc sau.</p></li>
+          <li class="how-step"><h3>Tìm lỗi đầu tiên</h3><p>Dựng timeline. Lỗi ồn ào nhất thường chỉ là thứ khuếch đại, không phải nguyên nhân.</p></li>
+          <li class="how-step"><h3>Chứng minh nguyên nhân gốc</h3><p>Tái hiện được, hoặc chỉ ra bằng metric, log hay đúng dòng code. Không đoán.</p></li>
+          <li class="how-step"><h3>Sửa và phòng ngừa</h3><p>Đưa bản sửa lâu dài kèm một lớp chặn: alert, test, policy hoặc runbook.</p></li>
+          <li class="how-step"><h3>Ghi lại</h3><p>Viết post-incident review không đổ lỗi, có số liệu, để người sau nhận ra pattern trong vài phút.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="index" class="inc-section" aria-labelledby="index-title">
+      <div class="wrap">
+        <p class="section-title">ls incidents/</p>
+        <h2 id="index-title" class="section-heading">Danh sách sự cố</h2>
+        <ul class="inc-index">
+          <li><a class="inc-card" href="#inc-01"><span class="inc-num">#01</span><h3>Mất node spot là pod chết 7 phút</h3><p>kubernetes · karpenter · aws</p></a></li>
+          <li><a class="inc-card" href="#inc-02"><span class="inc-num">#02</span><h3>Dịch vụ dịch trực tiếp sập đúng cuộc họp lớn nhất</h3><p>reliability · capacity · containers</p></a></li>
+          <li><a class="inc-card" href="#inc-03"><span class="inc-num">#03</span><h3>OpenSearch đỏ: retention policy hỏng âm thầm</h3><p>observability · opensearch</p></a></li>
+          <li><a class="inc-card" href="#inc-04"><span class="inc-num">#04</span><h3>7.279 lần restart bị che trong khi docker báo "Up"</h3><p>linux · docker · storage</p></a></li>
+          <li><a class="inc-card" href="#inc-05"><span class="inc-num">#05</span><h3>Database nằm sau load balancer public</h3><p>security · mysql · recovery</p></a></li>
+          <li><a class="inc-card" href="#inc-06"><span class="inc-num">#06</span><h3>RabbitMQ timeout: cross-zone load balancing đang tắt</h3><p>networking · nlb · kubernetes</p></a></li>
+          <li><a class="inc-card" href="#inc-07"><span class="inc-num">#07</span><h3>WebSocket rớt đúng ở giây thứ 60</h3><p>networking · alb · websocket</p></a></li>
+          <li><a class="inc-card" href="#inc-08"><span class="inc-num">#08</span><h3>Máy build bị treo: kernel RCU stall</h3><p>linux · kernel · ci/cd</p></a></li>
+          <li><a class="inc-card" href="#inc-09"><span class="inc-num">#09</span><h3>"Game bị lag": MongoDB quét toàn collection</h3><p>database · mongodb · performance</p></a></li>
+          <li><a class="inc-card" href="#inc-10"><span class="inc-num">#10</span><h3>Một nửa request lỗi: cache bị đầu độc trong một pod</h3><p>kubernetes · application · debugging</p></a></li>
+          <li><a class="inc-card" href="#inc-11"><span class="inc-num">#11</span><h3>Autoscaling dừng: SCP chặn RunInstances</h3><p>karpenter · aws organizations</p></a></li>
+          <li><a class="inc-card" href="#inc-12"><span class="inc-num">#12</span><h3>Một người xem, 1.247 phiên WebRTC, một máy bị treo</h3><p>linux · memory · webrtc</p></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="incidents" class="inc-section" aria-labelledby="incidents-title">
+      <div class="wrap">
+        <p class="section-title">cat incidents/*.md</p>
+        <h2 id="incidents-title" class="section-heading">Chi tiết từng sự cố</h2>
+
+        <article class="inc" id="inc-01">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#01</span><span class="tag">kubernetes</span><span class="tag">karpenter</span><span class="tag">aws</span><span class="sev">ảnh hưởng: ~7 phút gián đoạn mỗi lần mất spot</span></p>
+            <h3>Mất node spot là pod chết 7 phút: phần xử lý interruption chưa bao giờ được nối</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Karpenter đã khai báo hàng đợi SQS cho interruption, nhưng không có rule EventBridge nào đẩy sự kiện vào đó. Karpenter không bao giờ nhận được cảnh báo 2 phút trước khi mất spot, nên node chết mà không được drain, và ổ EBS vẫn gắn vào node đã chết khoảng 6 phút.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Một StatefulSet chạy 1 replica, dùng ổ EBS, nằm trên node spot, cứ "tự restart" rồi down khoảng 7 phút mỗi lần.</li>
+            <li>Cũng trong cluster đó, một worker real-time chạy 1 replica bị Karpenter consolidation đuổi ngay giữa phiên đang chạy (<code>Underutilized</code>).</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Event của pod: pod mới kẹt ở <code>ContainerCreating</code>. VolumeAttachment của ổ ReadWriteOnce vẫn trỏ vào node đã chết, tới khi Kubernetes force-detach sau khoảng 6 phút.</li>
+            <li><code>aws ec2 describe-instances</code> trả về <code>Server.SpotInstanceTermination</code>, còn spot request ghi <code>instance-terminated-no-capacity</code>. Đây là bị thu hồi spot, không phải crash.</li>
+            <li>Log Karpenter không có dòng <code>disrupting node(s)</code> (dòng này chỉ có khi consolidation). Chỉ có <code>tainted node</code>, xuất hiện khi instance đã mất rồi.</li>
+            <li>Karpenter có cấu hình interruption queue và queue có tồn tại, nhưng <code>aws events list-rule-names-by-target</code> cho queue đó trả về rỗng.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Phần xử lý interruption mới cấu hình một nửa: có queue nhưng không có rule EventBridge. Không có cảnh báo 2 phút thì Karpenter không thể cordon, drain và bật node thay thế sớm. Độ trễ khi gỡ ổ đĩa biến một lần restart ngắn thành 7 phút gián đoạn.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Tạo 5 rule EventBridge theo template mẫu của Karpenter (spot interruption, rebalance recommendation, scheduled change, instance state change, capacity reservation interruption), target là queue. Queue policy cho phép EventBridge gửi và chặn truy cập không TLS, retention đặt 300 giây.</li>
+            <li>Kiểm chứng bằng chính metric của Karpenter <code>karpenter_interruption_received_messages_total</code> (metric SQS trên CloudWatch bị trễ), và giữ sẵn script rollback.</li>
+            <li>Chuyển các workload 1 replica, nhạy với độ trễ sang NodePool on-demand kèm <code>karpenter.sh/do-not-disrupt</code>, cùng toleration của pool đó (quên toleration là pod Pending mãi).</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>PDB và do-not-disrupt chỉ chặn disruption tự nguyện (consolidation, drift). Khi spot bị thu hồi, chỉ cảnh báo interruption, thêm replica hoặc dùng on-demand mới giúp được.</li>
+            <li>Phân biệt được consolidation với thu hồi spot trong log trước khi chọn cách sửa.</li>
+            <li>Kiểm chứng một tích hợp bằng metric của nó, đừng thấy có giá trị cấu hình là yên tâm.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Các pod production chạy trên node spot thỉnh thoảng down khoảng 7 phút, không theo quy luật.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm nguyên nhân và chặn các lần gián đoạn mà không bỏ khoản tiết kiệm từ spot.</dd>
+              <dt>Hành động</dt><dd>Lần theo timeline của pod, thấy đó là thu hồi spot cộng với ổ EBS kẹt trên node đã chết. Phát hiện interruption queue của Karpenter không có rule EventBridge nào, tạo đủ 5 rule và kiểm chứng bằng metric Karpenter. Chuyển workload 1 replica sang on-demand với do-not-disrupt.</dd>
+              <dt>Kết quả</dt><dd>Karpenter giờ nhận được cảnh báo 2 phút và drain node trước. Các lần gián đoạn 7 phút khi mất spot không còn nữa.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Spot interruption khác consolidation thế nào?</dt>
+              <dd>Interruption là AWS lấy lại capacity, có cảnh báo trước 2 phút, không do mình chủ động. Consolidation là Karpenter tự gỡ hoặc thay node để tiết kiệm tiền, là chủ động và có tôn trọng PDB, do-not-disrupt.</dd>
+              <dt>Vì sao pod mất 7 phút chứ không phải 30 giây?</dt>
+              <dd>Ổ đĩa là ReadWriteOnce và attachment vẫn trỏ vào node đã terminate, nên pod mới không mount được cho tới khi attach/detach controller force-detach sau khoảng 6 phút. Nếu drain đúng cách thì ổ được nhả ngay.</dd>
+              <dt>Làm sao để một service có state chịu được spot?</dt>
+              <dd>Nhiều replica rải qua các AZ kèm PDB, nối đủ phần xử lý interruption, tắt êm (preStop hook, grace period đủ dài). Nếu không nhân bản được thì để nó trên on-demand.</dd>
+              <dt>Nhược điểm của do-not-disrupt là gì?</dt>
+              <dd>Nó chặn luôn drift và expiry, nên node không được vá hay đổi cỡ. Chỉ dùng cho workload thật sự không được di chuyển.</dd>
+            </dl>
+            <p class="review">ôn: các loại disruption của karpenter · eventbridge → sqs · ngữ nghĩa pdb · ebs csi attach/detach · statefulset</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-02">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#02</span><span class="tag">reliability</span><span class="tag">capacity</span><span class="tag">containers</span><span class="sev">ảnh hưởng: mất dịch 7 lần trong 15 phút</span></p>
+            <h3>Dịch vụ dịch trực tiếp sập đúng cuộc họp lớn nhất từ trước tới giờ</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một cuộc họp 7 người, 4 ngôn ngữ (21 nhánh dịch) đẩy agent vượt giới hạn 2 CPU. Cơn reconnect sau đó chạm trần 10 stream đồng thời của nhà cung cấp speech-to-text, một bug busy-loop làm worker đứng hình, và PID 1 là shell nên nuốt mất SIGTERM, pod cũ không bao giờ drain.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Độ trễ dịch tăng từ 7–11 giây lên 34–45 giây. Sau đó media server (SFU) đóng agent với lỗi <code>NEGOTIATE_FAILED</code>, agent bị giết và thay 7 lần trong 15 phút. Mọi người chuyển sang phòng nhỏ hơn thì chạy bình thường.</li>
+            <li>Kubernetes báo pod Ready suốt cả thời gian đó.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Dựng timeline từ log. Hai lần rớt đầu tiên không có lỗi nào từ nhà cung cấp, tức là quá tải thuần tuý. HTTP 429 đầu tiên chỉ xuất hiện sau khi restart, lúc pod cũ và pod mới cùng giữ stream.</li>
+            <li>Số liệu cgroup cho thấy CFS throttling ở 16–62% chu kỳ so với giới hạn 2 core, trong khi phòng họp cần khoảng 2,8 core. Bản thân máy SFU vẫn khoẻ (CPU 15–30%).</li>
+            <li>API concurrency của nhà cung cấp cho thấy trần 10 stream ở mức organization, dùng chung cho mọi môi trường và service xài cùng một key.</li>
+            <li>Tái hiện được ở local: sau khi server đóng websocket, vòng nhận tin của plugin STT cứ nhận được message "đã đóng" mà không await. Nó quay vòng mà không nhả event loop của asyncio, cả job đứng hình không một dòng log, rồi worker giết nó sau 60 giây. Bản upstream đã sửa lỗi này.</li>
+            <li>Container khởi động bằng <code>sh -c "python …"</code>, nên PID 1 là shell và nó bỏ qua SIGTERM. Python không bao giờ drain; pod cũ vẫn nhận job mới suốt 210 giây grace period rồi mới bị giết.</li>
+            <li>Health check chỉ kiểm một cổng TCP do tiến trình cha giữ, nên pod trông vẫn khoẻ trong khi mọi cuộc họp trên nó đã chết.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Tải vượt giới hạn CPU là ngòi nổ. Ba bug tiềm ẩn (trần dùng chung của nhà cung cấp, busy-loop trên socket đã đóng, PID 1 không chuyển tiếp tín hiệu) biến một lần quá tải thành vòng lặp crash. Chúng chưa từng lộ ra vì chưa có cuộc họp nào lớn như vậy; kỷ lục trước đó là 6 người, 3 ngôn ngữ.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Thiết kế lại theo kiểu fan-out: mỗi người nói chỉ được phiên âm một lần rồi lượt nói được phát lại cho từng nhánh ngôn ngữ (một stream STT mỗi người nói), kèm cơ chế chống quá tải và trần chi phí theo phòng. Triển khai theo từng giai đoạn sau một cờ duy nhất; giai đoạn 2 lên production ngay hôm sau.</li>
+            <li>Sửa tín hiệu và plugin: entrypoint dạng exec (hoặc tini) để SIGTERM tới được Python và worker drain được, backport bản sửa plugin từ upstream, và đặt CPU request, limit theo số đo thật.</li>
+            <li>Chống tạo trùng agent theo phòng, kèm jitter. Trong một sự cố trước đó, 5 trình duyệt cùng xin lại agent trong 240 ms, mở ra khoảng 52 stream STT trong 14 giây.</li>
+            <li>Đề xuất: tách key nhà cung cấp theo môi trường, health check dựa trên số phiên đang chạy thay vì cổng, và load test theo công thức số người nói × số ngôn ngữ.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Ở một đỉnh tải mới, các bug tiềm ẩn sẽ cùng lúc lộ ra. Hãy load test trường hợp xấu nhất, không phải trường hợp trung bình.</li>
+            <li>Tìm lỗi đầu tiên. Ở đây 429 chỉ là thứ khuếch đại, không phải nguyên nhân.</li>
+            <li>PID 1 phải xử lý được tín hiệu, nếu không mỗi lần rolling update sẽ giết phiên thay vì drain.</li>
+            <li>Health check phải kiểm thứ người dùng cần, không chỉ một cổng đang mở.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Dịch vụ dịch giọng nói trực tiếp sập trong cuộc họp lớn nhất từ trước tới giờ: 7 người, 4 ngôn ngữ.</dd>
+              <dt>Nhiệm vụ</dt><dd>Khôi phục dịch vụ, tìm nguyên nhân gốc và làm cho các cuộc họp lớn chạy an toàn.</dd>
+              <dt>Hành động</dt><dd>Dựng lại timeline và chứng minh quá tải xảy ra trước, 429 của nhà cung cấp tới sau. Đo CPU throttling, tìm ra trần 10 stream dùng chung, tái hiện bug busy-loop trong plugin STT và phát hiện PID 1 nuốt SIGTERM. Dẫn dắt bản thiết kế fan-out chỉ phiên âm mỗi người nói một lần.</dd>
+              <dt>Kết quả</dt><dd>Giai đoạn 2 của bản thiết kế mới lên production ngay hôm sau, kèm danh sách sửa lỗi rõ ràng cho tín hiệu, plugin, quota và một mô hình load test theo số người nói × số ngôn ngữ.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Làm sao biết 429 không phải nguyên nhân?</dt>
+              <dd>Nhờ timestamp. Hai lần rớt đầu tiên không có 429 nào. 429 đầu tiên xuất hiện sau khi restart, lúc hai pod chồng lên nhau.</dd>
+              <dt>CFS throttling là gì và xem ở đâu?</dt>
+              <dd>Đó là cơ chế giới hạn băng thông CPU của kernel: container dùng hết quota trong một chu kỳ 100 ms sẽ bị dừng tới chu kỳ sau. Xem <code>cpu.stat</code> trong cgroup hoặc metric <code>container_cpu_cfs_throttled_periods_total</code>.</dd>
+              <dt>Vì sao để <code>sh -c</code> làm PID 1 thì tắt êm không hoạt động?</dt>
+              <dd>PID 1 không có handler tín hiệu mặc định và shell không chuyển SIGTERM cho tiến trình con. Ứng dụng không bao giờ nhận được tín hiệu và bị giết khi hết grace period. Dùng dạng exec, <code>exec</code> trong script, hoặc một init như tini.</dd>
+              <dt>Làm sao chặn thundering herd khi reconnect?</dt>
+              <dd>Chống trùng ở phía server (mỗi phòng chỉ một yêu cầu đang xử lý, có TTL ngắn), thêm jitter và exponential backoff ở phía client.</dd>
+            </dl>
+            <p class="review">ôn: event loop asyncio bị chặn · giới hạn cpu của cgroup · pid 1 &amp; tín hiệu · rate limit &amp; backoff · readiness vs liveness</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-03">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#03</span><span class="tag">observability</span><span class="tag">opensearch</span><span class="tag">kubernetes</span><span class="sev">ảnh hưởng: không tìm được log · ổ đĩa 80%</span></p>
+            <h3>OpenSearch chuyển đỏ, và một retention policy đã hỏng âm thầm suốt nhiều tháng</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Retention policy cho production bị từ chối với HTTP 400 ngay lúc deploy, nhưng script khởi tạo vẫn in ra thành công. Log production không bao giờ bị xoá, shard dồn lên, và mỗi lần đổi node lại kéo theo một đợt recovery dài và nặng.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Dashboards báo "internal server error": parent circuit breaker ngắt ở 99% của heap 2 GB, sau khi pod chuyển sang node mới và nạp lại khoảng 3.650 primary shard.</li>
+            <li>Về sau cluster chuyển RED hai lần trong 21 giờ sau khi pod đổi node; mỗi lần recovery mất 13–15 phút.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li><code>_cluster/allocation/explain</code> trả về <code>can_allocate: yes</code> và <code>throttled</code>: RED ở đây là recovery chậm, không phải mất dữ liệu.</li>
+            <li>Script khởi tạo policy ghi log "done (0)", nhưng <code>$?</code> lấy từ <code>echo</code> chứ không phải từ <code>curl</code>. Phản hồi thật, nằm trong một file log bên trong pod, là HTTP 400: hai ISM template có pattern index chồng nhau không được dùng chung một priority.</li>
+            <li>ISM template chỉ gắn vào index lúc index được tạo, nên kể cả khi sửa policy thì các index đang có vẫn không được quản lý. Index production đã 178 ngày tuổi.</li>
+            <li>Tính shard: 33 GB chia cho 2.332 shard, khoảng 14 MB mỗi shard. Mỗi service nhỏ một index theo ngày nên sinh ra hàng nghìn shard tí hon; 40 nhóm nhỏ chiếm 65% số shard nhưng chỉ 4% dữ liệu.</li>
+            <li>Tốc độ recovery bị giới hạn bởi throttle mặc định (4 primary recovery đồng thời), không phải do băng thông: 33 GB ở 40 MB/s chỉ mất khoảng 14 giây.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Một lệnh gọi API không được kiểm kết quả trong postStart hook cộng với trùng priority khiến production không có retention, còn kiểu mỗi service một index theo ngày nhân số shard lên nhiều lần. Cluster một node chạy trên node có thể bị di chuyển nên mỗi lần đổi node là một lần recovery toàn bộ.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Đặt priority riêng cho từng policy, gắn index cũ bằng <code>_plugins/_ism/add</code> và xoá 2.000 index cũ (71 GB). Ổ đĩa từ 80% xuống 38%, shard từ 4.947 xuống 2.683.</li>
+            <li>Tăng heap từ 2 lên 3 GB và đặt replica bằng 0 cho cluster một node này: cluster về GREEN, hết replica ảo.</li>
+            <li>Tăng mức song song khi recovery (initial primaries 4 → 32, concurrent recoveries 8, nới giới hạn chunk và băng thông). Recovery giờ đi từ 64% lên 99,4% trong chưa tới 2 phút, thay vì khoảng 15 phút.</li>
+            <li>Bảo vệ pod khỏi consolidation, tạo snapshot repository S3 đầu tiên (dùng IRSA), và đổi alert RED từ <code>for: 5m</code> sang <code>15m</code> để một lần recovery bình thường không còn gọi người dậy.</li>
+          </ul>
+          <p class="oops"><strong>Lỗi của chính tôi, hay kể khi phỏng vấn:</strong> một lệnh wildcard <code>_ism/add/*dev*</code> khớp luôn cả alias của index, nên policy 14 ngày đã xoá 132 index dev nhỏ (214 MB). Từ đó tôi luôn chạy <code>_cat/aliases</code> trước mọi lệnh ghi dùng wildcard.</p>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Kiểm kết quả thật, đừng tin exit code của một lệnh khác. Đọc log thật.</li>
+            <li>Lên kế hoạch shard: dùng rollover hoặc index theo tháng cho các service nhỏ. Với index theo tháng, <code>min_index_age</code> tính từ lúc tạo index, nên retention phải ít nhất 60 ngày, nếu không sẽ xoá mất dữ liệu mới.</li>
+            <li>Throttle recovery là đòn bẩy rẻ nhất để rút ngắn thời gian recovery.</li>
+            <li>Không có snapshot là không có backup, kể cả với log.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Cluster log của chúng tôi chuyển đỏ hết lần này tới lần khác, tìm log thì báo lỗi.</dd>
+              <dt>Nhiệm vụ</dt><dd>Ổn định cluster và tìm ra vì sao nó mong manh như vậy.</dd>
+              <dt>Hành động</dt><dd>Chứng minh RED chỉ là recovery bị throttle. Phát hiện retention policy đã bị từ chối nhiều tháng trong khi script vẫn báo thành công. Sửa priority, gắn index cũ, xoá 71 GB, chỉnh heap, replica và throttle recovery. Thêm snapshot.</dd>
+              <dt>Kết quả</dt><dd>Ổ đĩa 80% → 38%, số shard giảm 46%, recovery dưới 2 phút thay vì khoảng 15 phút, hết alert báo nhầm.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Vì sao nhiều shard nhỏ lại không tốt?</dt>
+              <dd>Mỗi shard tốn heap, tốn file handle, được recovery riêng, và cluster state phình to. Nên nhắm tới vài chục GB mỗi shard, dùng rollover và gộp các index nhỏ.</dd>
+              <dt>Vì sao sửa policy rồi mà index cũ vẫn không được dọn?</dt>
+              <dd>ISM template chỉ gắn lúc tạo index. Index đang có phải gọi add hoặc change_policy một cách tường minh.</dd>
+              <dt>Bạn sẽ làm cluster này bền vững hơn thế nào?</dt>
+              <dd>Ít nhất 3 node trên capacity ổn định có replica, snapshot lên S3, ISM theo rollover, và alert cho heap, ngưỡng ổ đĩa và shard chưa được gán.</dd>
+              <dt>Kể về một lần bạn mắc lỗi.</dt>
+              <dd>Chính vụ wildcard khớp alias ở trên: ảnh hưởng nhỏ, chỉ ở dev, nhưng nó thay đổi cách tôi chạy mọi lệnh wildcard.</dd>
+            </dl>
+            <p class="review">ôn: shard &amp; heap · circuit breaker · ism/ilm · ngưỡng ổ đĩa (watermark) · snapshot repository</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-04">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#04</span><span class="tag">linux</span><span class="tag">docker</span><span class="tag">storage</span><span class="sev">ảnh hưởng: session replay hỏng âm thầm ~7 tuần</span></p>
+            <h3>Hệ thống analytics tự host crash-loop 7.279 lần trong khi <code>docker ps</code> vẫn báo "Up"</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Object store chạm giới hạn mặc định 8 volume và volume duy nhất của nó chuyển sang read-only. Upload bị timeout, service ingestion thoát với exit code 0, và <code>restart: always</code> che mất vòng lặp. 33 GB log của ZooKeeper và CPU credit cạn kiệt làm mọi thứ tệ hơn.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Session replay không còn về, ingestion bị ngắt quãng. Ổ root 92%, CPU steal 51%, load 10,7.</li>
+            <li><code>docker ps</code> hiện mọi container đều Up.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li><code>docker inspect --format '{{.RestartCount}}'</code> trả về 7.279, tức khoảng 7 phút restart một lần. Exit code 0 cộng với <code>restart: always</code> khiến vòng lặp crash trở nên vô hình.</li>
+            <li>Log: "S3 upload timed out after 120000ms", rồi unhandled promise rejection và tắt tiến trình. Mỗi lần restart còn giết luôn mọi consumer khác trong service đó.</li>
+            <li>Object store (SeaweedFS) báo "No writable volumes". Volume server đã dùng hết 8 slot mặc định, và volume duy nhất của bucket (31,4 GB) đã vượt giới hạn 30 GB nên thành read-only. Nới ổ đĩa không giúp gì: giới hạn nằm ở số slot, không phải dung lượng.</li>
+            <li>ZooKeeper tắt autopurge ngay từ đầu, để lại 33 GB transaction log.</li>
+            <li>Instance burstable dùng credit standard với số dư 0,17, nên steal 51% và CPU bị ghim ở mức baseline 40% suốt 7 ngày.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Ba giá trị mặc định nguy hiểm (8 slot volume, ZooKeeper tắt autopurge, CPU credit standard) cộng với một tiến trình thoát bằng exit code 0 khi gặp lỗi nghiêm trọng.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Tăng số slot volume lên 30 và hạ giới hạn kích thước volume xuống 8 GB, volume ghi được mới xuất hiện ngay. Sau khi restart service, số lần restart đứng yên ở 0. Thêm TTL 30 ngày cho bản ghi replay.</li>
+            <li>Dọn ZooKeeper ngay khi đang chạy và bật autopurge: ổ đĩa 92% → 54% (giải phóng 36 GB), không cần restart.</li>
+            <li>Chuyển instance sang credit unlimited (có hiệu lực ngay, không cần reboot): steal 0%, load 2,46.</li>
+            <li>Sau đó chuyển object storage chính sang Amazon S3.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Alert theo số lần restart; "Up" không có nghĩa là "khoẻ".</li>
+            <li>Thoát với exit code 0 khi gặp lỗi nghiêm trọng là một bug.</li>
+            <li>Nắm rõ giá trị mặc định của mọi thành phần có state mà mình tự host.</li>
+            <li>Với instance burstable, theo dõi số dư CPU credit; đổi loại instance cũng không giúp gì nếu vẫn để chế độ standard.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Một hệ thống product analytics tự host trông vẫn chạy, nhưng session replay đã chết nhiều tuần.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm nguyên nhân và khôi phục ingestion mà không mất dữ liệu.</dd>
+              <dt>Hành động</dt><dd>Tìm ra 7.279 lần restart bị che giấu và lần tới một object store hết slot volume. Giải phóng 36 GB log ZooKeeper ngay khi đang chạy và xử lý tình trạng cạn CPU credit.</dd>
+              <dt>Kết quả</dt><dd>Restart về 0, ổ đĩa 92% → 54%, CPU steal 51% → 0%, replay chạy lại.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Làm sao phát hiện crash loop mà Docker che mất?</dt>
+              <dd>Theo dõi số lần restart (<code>docker inspect</code>, cAdvisor, hoặc <code>kube_pod_container_status_restarts_total</code> trong Kubernetes) và alert theo tốc độ tăng của nó.</dd>
+              <dt>CPU steal là gì?</dt>
+              <dd>Là thời gian hypervisor không cấp CPU cho vCPU của bạn. Trên instance burstable, nó thường có nghĩa là đã hết CPU credit.</dd>
+              <dt>Vì sao thêm ổ đĩa không sửa được?</dt>
+              <dd>Lỗi nằm ở số slot volume ghi được. Mỗi volume có trần kích thước và server có số volume tối đa.</dd>
+            </dl>
+            <p class="review">ôn: restart policy &amp; exit code của docker · cpu credit của instance burstable · bảo trì zookeeper · alert theo số lần restart</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-05">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#05</span><span class="tag">security</span><span class="tag">mysql</span><span class="tag">recovery</span><span class="sev">ảnh hưởng: dữ liệu production gặp rủi ro · khôi phục không mất dữ liệu</span></p>
+            <h3>Database nằm sau load balancer public: khôi phục point-in-time và khoá chặt lại</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một cấu hình cũ để lại instance MySQL chạy trong Kubernetes truy cập được từ internet qua một Network Load Balancer public, và dữ liệu của nó cần được khôi phục. Chúng tôi khôi phục từ EBS snapshot cộng binary log mà không mất dữ liệu, rồi gỡ bỏ đường truy cập public.</p>
+          </header>
+          <h4>Phát hiện</h4>
+          <ul>
+            <li>Service của database có type <code>LoadBalancer</code>, đứng sau một NLB internet-facing, security group mở rộng hơn mức cần. Đây là phần còn sót lại từ một cấu hình cũ.</li>
+          </ul>
+          <h4>Khôi phục: point-in-time restore</h4>
+          <ol>
+            <li>Khoanh vùng trước: chuyển Service sang <code>ClusterIP</code> và siết security group để không gì mới chạm tới database được nữa.</li>
+            <li>Khôi phục ổ dữ liệu từ EBS snapshot tốt gần nhất.</li>
+            <li>Replay binary log từ vị trí của snapshot tới ngay trước thay đổi xấu (<code>mysqlbinlog --stop-datetime</code> hoặc <code>--stop-position</code>).</li>
+            <li>Kiểm tra số dòng và hành vi của ứng dụng, rồi đưa trở lại phục vụ.</li>
+          </ol>
+          <h4>Gia cố tôi dẫn dắt sau đó</h4>
+          <ul>
+            <li>Đóng các cổng database và quản trị mở ra internet trên toàn bộ hạ tầng AWS; quyền truy cập giờ đi qua một managed prefix list.</li>
+            <li>Giảm S3 bucket public từ 15 xuống 2, thêm alert DNS Firewall và VPC Flow Logs.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Snapshot cộng binary log cho phép khôi phục point-in-time, nhưng chỉ khi thời gian giữ binlog phủ được khoảng trống và việc restore đã được diễn tập.</li>
+            <li>Trong Kubernetes trên AWS, Service type <code>LoadBalancer</code> sẽ ra internet nếu không đánh dấu là internal. Hãy rà từng cái một.</li>
+            <li>Rà security group tìm <code>0.0.0.0/0</code> trên cổng database và cổng quản trị một cách liên tục, không phải làm một lần là xong.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Một MySQL cũ trong Kubernetes truy cập được từ internet, và dữ liệu của nó cần khôi phục.</dd>
+              <dt>Nhiệm vụ</dt><dd>Khôi phục không mất dữ liệu và bịt lỗ hổng.</dd>
+              <dt>Hành động</dt><dd>Khoanh vùng trước, khôi phục từ EBS snapshot, replay binary log tới đúng thời điểm, kiểm tra, rồi chuyển Service sang ClusterIP và siết security group.</dd>
+              <dt>Kết quả</dt><dd>Khôi phục đầy đủ, không mất dữ liệu. Sau đó tôi dẫn dắt đợt dọn rộng hơn với các cổng mở và bucket public.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Khôi phục point-in-time với MySQL hoạt động thế nào?</dt>
+              <dd>Restore một bản backup hoặc snapshot đầy đủ, rồi replay binary log từ vị trí binlog của bản backup tới thời điểm hoặc vị trí mong muốn.</dd>
+              <dt>Khi nghi bị xâm nhập, bạn làm gì đầu tiên?</dt>
+              <dd>Khoanh vùng (cắt truy cập, xoay vòng credential), giữ lại bằng chứng, xác định phạm vi qua log (VPC Flow Logs, log database), rồi mới khôi phục và gia cố.</dd>
+              <dt>Làm sao ngăn loại sự cố này?</dt>
+              <dd>Mặc định dùng load balancer internal, admission policy chặn load balancer public cho database, rà security group định kỳ, private endpoint và quyền tối thiểu.</dd>
+            </dl>
+            <p class="review">ôn: mysql binlog &amp; pitr · ebs snapshot · service type của k8s &amp; annotation lb của aws · cơ bản về incident response</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-06">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#06</span><span class="tag">networking</span><span class="tag">aws nlb</span><span class="tag">kubernetes</span><span class="sev">ảnh hưởng: client không reconnect được ~2 phút</span></p>
+            <h3>Client RabbitMQ bị timeout sau khi node bị thay: cross-zone load balancing đang tắt</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một pod broker bị drain khi spot bị thu hồi. NLB của nó tắt cross-zone load balancing và pod bị drain là target duy nhất trong AZ đó, nên client nào resolve ra IP của AZ này đều bị TCP timeout, trong khi AZ còn lại vẫn khoẻ.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Một consumer mất kết nối broker ngay giữa một sự kiện đang chạy, và các lần reconnect bị timeout thay vì chuyển sang chỗ khác.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Thời điểm khớp với một lần thu hồi spot. Karpenter drain node, và preStop <code>rabbitmq-upgrade drain</code> của broker đưa nó vào maintenance mode (<code>CONNECTION_FORCED</code>). Broker vắng mặt 67 giây.</li>
+            <li>NLB tắt cross-zone: DNS trả về mỗi AZ một IP, và mỗi IP chỉ tới được target trong chính AZ của nó. AZ-a chỉ có một pod broker, và <code>HealthyHostCount</code> theo AZ của AZ-a rơi về 0 khoảng 2 phút, trong khi AZ-c vẫn khoẻ.</li>
+            <li>Lịch sử: các pod broker đã đổi node 826 lần trong 3 tháng (khoảng 10 lần mỗi ngày), một nửa do thu hồi spot và một nửa do consolidation. Event của Kubernetes chỉ giữ một giờ, nên tôi dựng lại lịch sử từ CloudTrail (<code>BidEvictedEvent</code> cộng các lệnh <code>AttachVolume</code> của ổ đĩa).</li>
+            <li>Kiểm kết nối rơi vào đâu bằng cách mở N kết nối tới một IP của NLB rồi so <code>/proc/net/tcp6</code> trong từng pod. Với socket dual-stack, IPv4 hiện dưới dạng <code>::ffff:</code>, nên nếu chỉ đọc <code>/proc/net/tcp</code> sẽ thấy 0 kết nối.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>NLB định tuyến theo zone cộng với việc pod phân bố không đều: một AZ chỉ có một target, nên drain nó là IP của AZ đó thành hố đen.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Bật cross-zone load balancing trên các target group. Kết nối vào IP của AZ-a giờ được rải đều qua mọi pod: trước 9/0/0, sau 5/1/3. Rollback chỉ cần một lệnh CLI.</li>
+            <li>Đề xuất: client reconnect có backoff và thử endpoint khác; rải pod broker đều qua các AZ.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Cross-zone của NLB mặc định tắt, và khi tắt thì mỗi IP của AZ là một failure domain riêng.</li>
+            <li>Broker chạy trên spot sẽ bị thay node liên tục; hãy thiết kế client chịu được điều đó.</li>
+            <li>Khi event của Kubernetes đã mất, CloudTrail và metric theo AZ của load balancer vẫn kể lại được câu chuyện.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Một consumer mất broker giữa sự kiện và không reconnect được trong hai phút.</dd>
+              <dt>Nhiệm vụ</dt><dd>Giải thích các lần timeout và chặn chúng.</dd>
+              <dt>Hành động</dt><dd>Nối lần rớt với một lần drain do spot, phát hiện cross-zone đang tắt và một AZ chỉ có một target, dựng lại 3 tháng thay node từ CloudTrail và kiểm cách kết nối được rải qua các pod.</dd>
+              <dt>Kết quả</dt><dd>Bật cross-zone; giờ IP nào của NLB cũng tới được pod khoẻ ở mọi AZ.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Cross-zone load balancing thay đổi điều gì?</dt>
+              <dd>Khi bật, mỗi node của load balancer gửi được traffic tới target ở mọi AZ đang bật; khi tắt, chỉ gửi trong AZ của chính nó. ALB mặc định bật, NLB mặc định tắt, và có tính phí traffic giữa các AZ.</dd>
+              <dt>Vì sao client bị timeout mà không thử IP khác?</dt>
+              <dd>Chúng resolve một lần và giữ một IP. Gói TCP SYN tới một AZ không có target khoẻ thì chỉ có thể timeout.</dd>
+              <dt>Chạy RabbitMQ trên Kubernetes an toàn hơn thế nào?</dt>
+              <dd>Dùng Cluster Operator với 3 replica rải qua các AZ, quorum queue, PDB, capacity ổn định, và client có reconnect kèm backoff.</dd>
+            </dl>
+            <p class="review">ôn: nlb vs alb · cross-zone &amp; az affinity · maintenance mode &amp; quorum queue của rabbitmq · điều tra bằng cloudtrail</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-07">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#07</span><span class="tag">networking</span><span class="tag">aws alb</span><span class="tag">websocket</span><span class="sev">ảnh hưởng: "lag" định kỳ và reconnect mất 5 giây</span></p>
+            <h3>WebSocket rớt đúng ở giây thứ 60: trình duyệt bóp timer gặp idle timeout của ALB</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Tab trình duyệt chạy nền làm vòng gửi tin của client chậm lại còn khoảng một tin mỗi phút. ALB đóng kết nối rảnh sau 60 giây, nên khi khoảng cách giữa hai tin chạm 60,0 giây thì kết nối chết.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Người chơi báo "game server bị lag". p95 của server dưới 35 ms, CPU database 2–3%, gần như không có request chậm.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Loại trừ server và database trước: p95, CPU và slow log đều khoẻ.</li>
+            <li>Xem các lần xoá phiên của người dùng thật: 2–5 lần rớt mỗi 15 phút, mỗi lần mất khoảng 5 giây để kết nối lại.</li>
+            <li>Khoảng cách giữa các tin của client tăng dần 30 giây → 57 → 59 → 60,0 rồi kết nối rớt, luôn đúng 60 giây và chỉ khi tab chạy nền. Chrome bóp timer rất mạnh ở tab nền (intensive throttling), làm vòng lặp WebGL chậm lại còn khoảng một tin mỗi phút.</li>
+            <li>Idle timeout của chính server là 120 giây, nên server không phải bên đóng kết nối. Idle timeout của ALB là 60 giây, và access log của ALB cho thấy kết nối <code>wss</code> đóng trong vòng 1 ms so với dòng "remove user" của server.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Idle timeout của load balancer ngắn hơn khoảng cách lớn nhất giữa hai tin nhắn của client.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Tăng idle timeout của ALB lên 120–180 giây và thêm ping từ phía server (hoặc heartbeat của giao thức) dưới 60 giây, không phụ thuộc vào vòng lặp đang bị bóp của client. Làm cho việc reconnect diễn ra êm.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Không phải "lag" nào cũng do server hay database; đo trước khi tinh chỉnh.</li>
+            <li>Mọi proxy trên đường đi đều có idle timeout (ALB mặc định 60 giây, NGINX <code>proxy_read_timeout</code> 60 giây). WebSocket cần heartbeat ngắn hơn timeout nhỏ nhất trong số đó.</li>
+            <li>Trình duyệt bóp timer ở tab chạy nền.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Người dùng báo lag trong khi mọi metric của server đều xanh.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm nguyên nhân thật.</dd>
+              <dt>Hành động</dt><dd>Loại trừ server và database, rồi khớp khoảng cách giữa các tin của client với các lần rớt, và con số đúng 60,0 giây với idle timeout của ALB, xác nhận bằng access log của ALB.</dd>
+              <dt>Kết quả</dt><dd>Chứng minh được nguyên nhân gốc bằng log; cách sửa chỉ là một thiết lập cộng một heartbeat.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>WebSocket có thể bị cắt ở đâu trên AWS?</dt>
+              <dd>Ở trình duyệt, CDN, idle timeout của ALB/NLB, timeout của ingress hoặc proxy, và idle timeout của chính ứng dụng.</dd>
+              <dt>Nên ping từ client hay từ server?</dt>
+              <dd>Từ server (hoặc ping frame của giao thức), vì tab chạy nền bị bóp timer phía client.</dd>
+              <dt>Làm sao chứng minh không phải do server?</dt>
+              <dd>Idle timeout của server là 120 giây, nhưng kết nối rớt đúng 60,0 giây, bằng giá trị của ALB, và log của ALB đóng kết nối đúng thời điểm đó.</dd>
+            </dl>
+            <p class="review">ôn: keepalive của websocket · idle timeout của alb · trình duyệt bóp timer · access log của alb</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-08">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#08</span><span class="tag">linux</span><span class="tag">kernel</span><span class="tag">ci/cd</span><span class="sev">ảnh hưởng: CI hỏng · phải reset cứng máy</span></p>
+            <h3>Máy build on-prem bị treo: kernel RCU stall, không phải CPU hay RAM</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Việc khởi động và dừng container cần một expedited RCU grace period, nhưng một core CPU nằm ở trạng thái nghỉ sâu và không bao giờ phản hồi. Hàng trăm tiến trình xếp hàng ở trạng thái ngủ không ngắt được, sau đúng một lock của kernel.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Job Jenkins thất bại với lỗi "docker run … Timeout after 180 seconds".</li>
+            <li>SSH vẫn nhận kết nối nhưng không chạy được lệnh, trong khi các container đang chạy vẫn phục vụ bình thường.</li>
+            <li>Lỗi quay lại sau 2,5 ngày, rồi 4 ngày, 2 ngày, và cuối cùng chỉ 5 phút sau khi reboot.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Load average 231 trong khi mới dùng 16/125 GB RAM và ổ đĩa còn trống nhiều: không phải vấn đề tài nguyên.</li>
+            <li><code>ps -eo stat | grep -c ^D</code> trả về khoảng 240 tiến trình ở trạng thái ngủ không ngắt được (D state), phần lớn là <code>runc</code>.</li>
+            <li><code>dmesg</code>: "rcu_preempt detected expedited stalls", và NMI backtrace cho thấy CPU bị kẹt đang nghỉ trong <code>intel_idle</code>.</li>
+            <li>Kernel stack: tác vụ kẹt đầu tiên chờ trong <code>synchronize_rcu_expedited</code> (giải phóng mount namespace khi container thoát) trong lúc giữ lock, và mọi <code>runc</code> sau đó xếp hàng phía sau.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Tương tác giữa kernel và CPU: expedited RCU grace period không bao giờ hoàn tất vì một core đang ở C-state sâu không phản hồi. Đây là một lớp lỗi đã biết trên dòng CPU desktop đời này.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Giải pháp tạm đã triển khai: chuyển các job build sang một node on-prem khác, ở đó build còn nhanh hơn (4m33s so với khoảng 8 phút). Thêm các điều kiện cần cho agent (git-lfs và AWS CLI trên máy host, vì các bước đó chạy ngoài container build) vào một checklist.</li>
+            <li>Biện pháp đề xuất: <code>kernel.rcu_normal=1</code>, tham số boot <code>intel_idle.max_cstate=1</code>, và cập nhật BIOS, microcode.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Load cao trong khi CPU rảnh và nhiều tiến trình D state nghĩa là các tác vụ đang bị chặn trong kernel. Đọc <code>dmesg</code> và kernel stack.</li>
+            <li>Một lần reboot mà mỗi lần lại giúp được ít thời gian hơn thì không phải là cách sửa.</li>
+            <li>Tìm lỗi đầu tiên: ở cuối log, một lỗi sai loại credential đã che mất lỗi thật "aws: not found".</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Máy CI on-prem liên tục bị treo và build thất bại.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm nguyên nhân và giữ cho CI chạy được.</dd>
+              <dt>Hành động</dt><dd>Chứng minh không phải CPU, RAM hay ổ đĩa, tìm ra khoảng 240 tác vụ D state sau một expedited RCU stall, chuyển build sang node khác và đề xuất các biện pháp cho kernel và BIOS.</dd>
+              <dt>Kết quả</dt><dd>CI xanh trở lại, build còn nhanh hơn (4m33s so với khoảng 8 phút).</dd>
+            </dl>
+            <dl class="qa">
+              <dt>D state là gì?</dt>
+              <dd>Là trạng thái ngủ không ngắt được, thường do chờ I/O hoặc một lock của kernel. <code>kill -9</code> không có tác dụng với nó, và nó được tính vào load average.</dd>
+              <dt>RCU là gì?</dt>
+              <dd>Read-Copy-Update, một cơ chế đồng bộ trong kernel: bên ghi chờ một grace period cho tới khi mọi bên đọc xong. Expedited grace period ép quá trình này nhanh hơn bằng cách gửi ngắt tới mọi CPU.</dd>
+              <dt>Debug một máy không chạy được lệnh mới thế nào?</dt>
+              <dd>Dùng phiên đang mở sẵn hoặc console, dump các tác vụ bị chặn bằng <code>echo w &gt; /proc/sysrq-trigger</code>, và đọc persistent journal sau khi reboot.</dd>
+            </dl>
+            <p class="review">ôn: trạng thái tiến trình linux · load average · dmesg &amp; sysrq · namespace trong container runtime · c-state</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-09">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#09</span><span class="tag">database</span><span class="tag">mongodb</span><span class="tag">performance</span><span class="sev">ảnh hưởng: request 1–2,5 giây · database 100% CPU</span></p>
+            <h3>"Game bị lag": MongoDB quét toàn collection trên một instance nhỏ</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Annotation khai báo index trong code chưa bao giờ được áp dụng, vì tính năng tự tạo index bị tắt và không có migration. Các query nóng quét từ 133.000 tới 269.000 document.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Người chơi báo game giật trong các giải đấu. Request chậm dồn vào các phút chẵn, trong khi pod ứng dụng chỉ dùng khoảng 0,1 trên 1 CPU.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Pod ứng dụng khoẻ. Máy database (một t3.small) đi từ 2% CPU lên trung bình 40–48%, đỉnh 99,8% khi bắt đầu có người chơi, và CPU credit giảm dần.</li>
+            <li>Slow log của mongod cho thấy 30–48 giây thời gian query mỗi phút, gần như toàn bộ trên một collection có 269.000 document:
+              <ul>
+                <li><code>find {eventId}</code> là COLLSCAN, dù code đã khai báo unique index cho field này.</li>
+                <li><code>find {stream, sourceEventId}</code> chỉ dùng được phần đầu của một index khác và quét 133.000 document (1–2,5 giây).</li>
+              </ul>
+            </li>
+            <li>Tính năng tự tạo index của Spring Data bị tắt và collection không có migration tạo collection, nên các annotation không bao giờ thành index.</li>
+            <li>Một TTL index 7 ngày không xoá gì cả: 214.000 trên 220.000 dòng lưu thời gian dưới dạng số, mà TTL chỉ hoạt động với kiểu Date.</li>
+            <li>Một tuần sau, điểm nóng thứ hai: collection users chỉ có index <code>_id</code>, và một lệnh tra email không phân biệt hoa thường (dùng collation) chạy một lần cho mỗi ghế, mỗi request. Bot gọi API mỗi giây đẩy database lên 100% CPU.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Thiếu index trên production, cộng với các lệnh tra cứu theo từng request bị nhân lên bởi việc polling.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Gửi cho team sở hữu schema một bản sửa chính xác: unique index cho <code>eventId</code>, compound index cho <code>{stream, sourceEventId}</code>, index email có cùng collation với query, một đợt backfill đổi kiểu thời gian để TTL hoạt động, và cache kết quả tra cứu user. Team đó đưa vào bằng migration của họ.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Annotation index của ORM không phải là migration. Hãy quản lý index một cách tường minh.</li>
+            <li>TTL index cần field kiểu Date; query có collation cần index cùng collation.</li>
+            <li>Xem slow log của database trước khi scale ứng dụng.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Người chơi báo lag trong các giải đấu.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm điểm nghẽn.</dd>
+              <dt>Hành động</dt><dd>Loại trừ ứng dụng, đọc slow log của MongoDB, tìm ra các lần quét toàn collection trên hai collection, và lần ra nguyên nhân là annotation index chưa từng được áp dụng cùng TTL đặt trên sai kiểu dữ liệu.</dd>
+              <dt>Kết quả</dt><dd>Ngay trong ngày, gửi được nguyên nhân gốc và thay đổi index chính xác cho team sở hữu.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Tìm query chậm trong MongoDB thế nào?</dt>
+              <dd>Dùng profiler hoặc slow query log, rồi <code>explain("executionStats")</code>: tìm COLLSCAN và so docsExamined với nReturned.</dd>
+              <dt>Vì sao annotation unique không tạo ra index?</dt>
+              <dd>Các bản Spring Data gần đây tắt tự tạo index theo mặc định, nên index phải được tạo bằng migration hoặc lệnh tạo index tường minh.</dd>
+              <dt>Sắp xếp field trong compound index thế nào?</dt>
+              <dd>Theo quy tắc ESR: field so sánh bằng (Equality) trước, rồi tới Sort, rồi Range.</dd>
+            </dl>
+            <p class="review">ôn: index &amp; explain của mongodb · quy tắc esr · ttl index · collation · n+1 query</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-10">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#10</span><span class="tag">kubernetes</span><span class="tag">application</span><span class="tag">debugging</span><span class="sev">ảnh hưởng: ~50% request trang quản trị bị lỗi</span></p>
+            <h3>Một nửa request bị lỗi: cache trong tiến trình bị "đầu độc" trên một pod chạy lâu</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một thư viện UI cache một schema map trong bộ nhớ toàn cục của tiến trình, key chỉ là tên collection. Nếu request đầu tiên dựng map là request chưa đăng nhập, map được dựng từ một config đã bị lược bớt và hỏng luôn tới khi restart. Với hai replica sau ALB, khoảng một nửa số request rơi vào pod hỏng.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Trang quản trị của CMS "lúc hiện dữ liệu, lúc không". Ở local thì mọi thứ đều chạy.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Log pod có lỗi TypeError lúc render phía server (SSR), trong code đã minify. Tôi giải minify bằng cách tải đúng phiên bản package (<code>npm pack</code>) rồi tìm trong đó: schema map phía client thiếu một entry mà map phía server có.</li>
+            <li>Tìm ra cache: lưu trên <code>global</code>, key chỉ là slug của collection, sống suốt đời tiến trình.</li>
+            <li>Bằng chứng: pod lâu đời nhất (4 giờ 23 phút) ghi 69 lỗi, các pod mới khởi động ghi 0 lỗi. Cùng image, cùng môi trường, cùng database.</li>
+            <li>Tái hiện bằng script: nếu lần dựng đầu tiên có đăng nhập, map có 17 entry và chạy tốt; nếu chưa đăng nhập, map chỉ có 3 entry và crash.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Cache bị request chưa đăng nhập đầu tiên đầu độc, cộng với round-robin qua hai replica, dẫn tới khoảng 50% request lỗi.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Giảm đau: scale về một replica và restart rollout thông qua Git. ArgoCD self-heal sẽ revert <code>kubectl scale</code>, và khi scale xuống Kubernetes xoá pod mới nhất trước, tức là giữ lại đúng pod hỏng, nên bắt buộc phải rollout restart.</li>
+            <li>Sửa gốc: một bản <code>pnpm patch</code> để config chưa đăng nhập không bao giờ đọc hay ghi vào cache dùng chung. Dockerfile cũng phải copy <code>patches/</code> và <code>pnpm-workspace.yaml</code>, nếu không bản vá sẽ âm thầm không được áp dụng. Nâng phiên bản thư viện không giúp được, vì bản mới nhất vẫn y nguyên đoạn code đó.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>"Lúc được lúc không" cộng với nhiều replica: hãy tìm state riêng của từng pod.</li>
+            <li>Cache toàn cục trong tiến trình cần key đầy đủ (ai, cái gì, phiên bản nào).</li>
+            <li>Kiểm chứng rằng bản vá thật sự nằm trong image.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Một trang quản trị trên production lỗi ngẫu nhiên nhưng ở local lại chạy tốt.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm ra vì sao lỗi lúc có lúc không.</dd>
+              <dt>Hành động</dt><dd>Giải minify stack trace, tìm ra cache toàn cục bị request chưa đăng nhập đầu độc, chứng minh theo từng pod (69 lỗi so với 0) và tái hiện bằng script.</dd>
+              <dt>Kết quả</dt><dd>Giảm đau ngay trong ngày, sau đó gửi bản vá thư viện kèm script tái hiện.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Debug lỗi trong code đã minify trên production thế nào?</dt>
+              <dd>Dùng source map nếu có; nếu không, tải đúng phiên bản package và tìm đoạn code quanh chỗ lỗi.</dd>
+              <dt>Vì sao scale xuống lại giữ pod hỏng?</dt>
+              <dd>Khi ReplicaSet scale xuống, nó ưu tiên xoá các pod mới nhất.</dd>
+              <dt>Tránh cache bị đầu độc thế nào?</dt>
+              <dd>Đặt key theo mọi thứ làm thay đổi giá trị, không bao giờ cache bản lỗi hoặc bản chưa đăng nhập, thêm TTL và có cách xem tình trạng cache.</dd>
+            </dl>
+            <p class="review">ôn: thứ tự xoá pod khi replicaset scale xuống · gitops self-heal · cache khi ssr · source map</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-11">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#11</span><span class="tag">karpenter</span><span class="tag">aws organizations</span><span class="sev">ảnh hưởng: không có node mới · CI đứng</span></p>
+            <h3>Autoscaling dừng trên toàn cluster: một SCP của organization chặn ec2:RunInstances</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một service control policy ở cấp AWS Organizations chặn Karpenter tạo instance. Cả 7 NodePool dùng chung một EC2NodeClass, nên toàn cluster mất khả năng scale-out cùng lúc.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Pod nằm Pending ("0/14 nodes are available … untolerated taints") và không có NodeClaim nào được tạo. Các node đang chạy vẫn sống.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Không có NodeClaim nghĩa là Karpenter còn chưa thử tạo node; các NodePool đang <code>Ready=False</code>.</li>
+            <li>Condition của EC2NodeClass ghi <code>RunInstancesAuthCheckFailed</code>: không được phép gọi <code>ec2:RunInstances</code> do một service control policy.</li>
+            <li>Cả 7 NodePool đều trỏ vào đúng EC2NodeClass đó.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Một lớp chặn nằm ngoài cluster (SCP), cộng với việc dùng chung một EC2NodeClass thành điểm lỗi duy nhất.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Ghim CI sang một pool vẫn còn capacity, báo SCP lên admin của organization kèm bằng chứng chính xác, và ghi lại một lệnh kiểm tra nhanh: <code>kubectl get ec2nodeclass default -o jsonpath='{.status.conditions}'</code>.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>Khi không thấy node mới, hãy xem condition của NodeClass và NodePool trước khi đào vào scheduler.</li>
+            <li>Alert khi NodePool hoặc NodeClass <code>Ready=False</code>.</li>
+            <li>Sự xuống cấp diễn ra âm thầm: không gì hỏng cho tới khi cần thay một node, và lúc đó thì không thay được.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Pod mới cứ nằm Pending và CI dừng.</dd>
+              <dt>Nhiệm vụ</dt><dd>Khôi phục khả năng scale.</dd>
+              <dt>Hành động</dt><dd>Nhận ra không có NodeClaim nào, đọc condition của NodeClass và tìm ra một SCP cấp organization đang chặn RunInstances. Gỡ kẹt cho CI bằng cách ghim nó sang pool còn capacity và báo SCP lên trên.</dd>
+              <dt>Kết quả</dt><dd>CI chạy lại ngay trong ngày, và bên sở hữu nhận được nguyên nhân gốc kèm bằng chứng.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>SCP là gì?</dt>
+              <dd>Là policy của AWS Organizations đặt ra mức quyền tối đa cho các account. Một quyền allow trong IAM không thể vượt qua một lệnh deny của SCP.</dd>
+              <dt>Vì sao một lỗi làm hỏng mọi NodePool?</dt>
+              <dd>Chúng dùng chung một EC2NodeClass (cùng IAM role, AMI và subnet), nên là một failure domain.</dd>
+            </dl>
+            <p class="review">ôn: nodepool &amp; ec2nodeclass của karpenter · cách đánh giá scp vs iam · xử lý pod pending</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-12">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#12</span><span class="tag">linux</span><span class="tag">memory</span><span class="tag">webrtc</span><span class="sev">ảnh hưởng: máy streaming không phản hồi ~11 giờ</span></p>
+            <h3>Một người xem mở 1.247 phiên WebRTC và làm treo máy streaming</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Một client mắc kẹt trong vòng lặp thử lại, cứ khoảng 3 giây mở một phiên. Bộ nhớ rò rỉ bên trong media server cho tới khi kernel phải thrash page cache. Không tiến trình nào bị giết, nên cũng không có gì được restart.</p>
+          </header>
+          <h4>Triệu chứng</h4>
+          <ul>
+            <li>Lệnh SSM không gửi được, status check của instance báo impaired, network out bằng 0 và CPU khoảng 10% (iowait).</li>
+            <li>Một alert ping đã kêu suốt 11 giờ nhưng không ai xử lý.</li>
+          </ul>
+          <h4>Điều tra</h4>
+          <ol>
+            <li>Dấu hiệu thrashing: số lần đọc EBS tăng từ 700 lần/giờ lên 4,4 triệu lần/giờ trong khi số lần ghi đứng yên; page cache tụt từ 1.040 MB xuống 38 MB; không có OOM kill nào.</li>
+            <li>Log container còn nguyên sau reboot: 1.268 phiên WebRTC trong ngày, 1.247 phiên từ một người xem duy nhất, mỗi phiên kéo dài khoảng 2 giây. Đó là vòng lặp reconnect của client do stream H.264 bị lỗi.</li>
+            <li>Bộ nhớ vẫn tiếp tục leo sau khi vòng lặp dừng, tức là các phiên đã đóng không được giải phóng bên trong media server.</li>
+          </ol>
+          <h4>Nguyên nhân gốc</h4>
+          <p>Một client mở phiên liên tục không giới hạn, một chỗ rò bộ nhớ trong media server, và máy host không có lưới an toàn nào cho bộ nhớ.</p>
+          <h4>Cách sửa</h4>
+          <ul>
+            <li>Gia cố cả máy dev và prod: swap cộng earlyoom (ưu tiên giết media server thay vì service hệ thống), <code>min_free_kbytes</code> và <code>kernel.panic</code>.</li>
+            <li>Thêm node_exporter với metric bộ nhớ theo từng container, alarm CloudWatch tự động reboot và recover, đẩy log lên OpenSearch, và một metric đếm số người xem mỗi stream.</li>
+          </ul>
+          <h4>Bài học</h4>
+          <ul>
+            <li>"Không có OOM kill" không có nghĩa là khoẻ; thrashing có thể làm treo máy hàng giờ.</li>
+            <li>Alert không ai theo dõi thì không phải là monitoring.</li>
+            <li>Giới hạn số phiên trên mỗi client.</li>
+          </ul>
+          <details class="drill">
+            <summary>Kể trong 60 giây + hỏi đáp chuyên sâu</summary>
+            <dl class="star">
+              <dt>Tình huống</dt><dd>Một máy streaming không truy cập được trong nhiều giờ.</dd>
+              <dt>Nhiệm vụ</dt><dd>Tìm nguyên nhân và chặn không cho tái diễn.</dd>
+              <dt>Hành động</dt><dd>Nhận ra thrashing bộ nhớ qua kiểu đọc EBS, lần ra 1.247 phiên từ một người xem, và gia cố máy dev, prod bằng lớp bảo vệ bộ nhớ, metric và alarm tự phục hồi.</dd>
+              <dt>Kết quả</dt><dd>Máy giờ tự phục hồi, và đã nhìn thấy được bộ nhớ theo từng container cũng như số người xem mỗi stream.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Vì sao không có OOM kill?</dt>
+              <dd>Kernel cứ tiếp tục thu hồi page cache thay vì giết tiến trình. Máy rất chậm nhưng chưa bao giờ thật sự hết bộ nhớ: đúng kiểu thrashing kinh điển. earlyoom hoặc systemd-oomd ra tay sớm hơn.</dd>
+              <dt>Làm sao nhận ra thrashing?</dt>
+              <dd>IOPS đọc tăng vọt trong khi ghi đứng yên, iowait cao và page cache gần như trống.</dd>
+            </dl>
+            <p class="review">ôn: thu hồi bộ nhớ &amp; oom killer của linux · swap &amp; earlyoom · status check &amp; auto-recovery của ec2 · vòng đời phiên webrtc</p>
+          </details>
+        </article>
+      </div>
+    </section>
+
+    <section id="questions" class="inc-section" aria-labelledby="questions-title">
+      <div class="wrap">
+        <p class="section-title">grep -l "interview" incidents/*</p>
+        <h2 id="questions-title" class="section-heading">Câu hỏi thường gặp và nên kể sự cố nào</h2>
+        <ul class="q-map">
+          <li><span>Kể về sự cố khó nhất bạn từng xử lý.</span><span><a href="#inc-02">#02</a><a href="#inc-03">#03</a></span></li>
+          <li><span>Kể về một lần bạn mắc lỗi.</span><span><a href="#inc-03">#03</a></span></li>
+          <li><span>Kể một vấn đề Kubernetes bạn đã debug.</span><span><a href="#inc-01">#01</a><a href="#inc-10">#10</a><a href="#inc-11">#11</a></span></li>
+          <li><span>Một vấn đề network bạn đã giải quyết?</span><span><a href="#inc-06">#06</a><a href="#inc-07">#07</a></span></li>
+          <li><span>Bạn xử lý một ứng dụng chạy chậm thế nào?</span><span><a href="#inc-09">#09</a><a href="#inc-07">#07</a></span></li>
+          <li><span>Kinh nghiệm troubleshoot Linux?</span><span><a href="#inc-08">#08</a><a href="#inc-12">#12</a><a href="#inc-04">#04</a></span></li>
+          <li><span>Bạn đã xử lý sự cố bảo mật nào chưa?</span><span><a href="#inc-05">#05</a></span></li>
+          <li><span>Bạn cân bằng chi phí và độ tin cậy thế nào?</span><span><a href="#inc-01">#01</a><a href="#inc-04">#04</a></span></li>
+          <li><span>Làm sao biết monitoring của bạn thật sự hoạt động?</span><span><a href="#inc-04">#04</a><a href="#inc-03">#03</a><a href="#inc-02">#02</a><a href="#inc-12">#12</a></span></li>
+          <li><span>Có lần nào thứ nằm ngoài tầm kiểm soát làm hỏng production?</span><span><a href="#inc-11">#11</a><a href="#inc-02">#02</a></span></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer">
+    <div class="wrap footer-inner">
+      <p class="footer-line">© 2026 Bùi Thanh Tài · <a href="../../">quay lại portfolio</a> · <a href="../" hreflang="en" lang="en">English version</a></p>
+      <p class="footer-line"><a href="https://github.com/taibt-devops/portfolio/actions" rel="noopener" target="_blank">deployed via GitHub Actions <span class="t-ok">✓</span></a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/main.js" defer></script>
+</body>
+</html>

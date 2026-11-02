@@ -5,6 +5,13 @@
 .inc-lede { max-width: 780px; color: var(--text-dim); margin-bottom: 14px; }
 .inc-note { font-family: var(--mono); font-size: 13px; color: var(--amber); }
 
+/* Language switch (English / Tiếng Việt) */
+.lang-switch { display: flex; gap: 6px; margin-bottom: 18px; font-family: var(--mono); font-size: 13px; }
+.lang-switch a, .lang-switch span { padding: 3px 12px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; }
+.lang-switch a { color: var(--text-dim); }
+.lang-switch a:hover { color: var(--accent); border-color: var(--accent-dim); }
+.lang-switch [aria-current] { color: #04220f; background: var(--accent); border-color: var(--accent); }
+
 /* How I work an incident */
 .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; list-style: none; padding: 0; counter-reset: step; }
 .how-step {
