@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incident Notebook — Bui Thanh Tai</title>
+  <meta name="description" content="Real production incidents from AWS, Kubernetes and on-prem Linux: symptoms, investigation, root cause, fix and lessons, by Bui Thanh Tai, Senior DevOps Engineer.">
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="canonical" href="https://taibt-devops.github.io/portfolio/incidents/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Incident Notebook — Bui Thanh Tai">
+  <meta property="og:description" content="Twelve real production incidents: what broke, how I found the root cause, what fixed it and what I learned.">
+  <meta property="og:image" content="https://taibt-devops.github.io/portfolio/assets/img/og-image.png">
+  <meta property="og:url" content="https://taibt-devops.github.io/portfolio/incidents/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/incidents.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header id="site-nav">
+    <nav class="wrap nav-inner" aria-label="Main">
+      <a class="brand" href="../">taibt<span class="brand-at">@devops</span><span class="brand-path">:~/incidents$</span></a>
+      <button type="button" class="nav-burger" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <ul id="nav-menu" class="nav-links">
+        <li><a href="#approach">approach</a></li>
+        <li><a href="#index">incidents</a></li>
+        <li><a href="#questions">questions</a></li>
+        <li><a href="../">portfolio</a></li>
+        <li><a class="btn btn-ghost" href="../cv/BUI_THANH_TAI_CV.pdf" download>download cv</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="inc-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <p class="hero-kicker">// incident notebook · aws · kubernetes · linux</p>
+        <h1 id="page-title" class="inc-title">Production incidents I've handled, <span class="grad">and what they taught me</span></h1>
+        <p class="inc-lede">Twelve real issues from running AWS, Kubernetes and on-prem Linux for 20+ products. Each one follows the same path: symptoms, investigation, root cause, fix and lessons. Each also has a 60-second version and the follow-up questions engineers usually ask.</p>
+        <p class="inc-note">Company names, hosts and account details are removed. The numbers are real.</p>
+      </div>
+    </section>
+
+    <section id="approach" class="inc-section" aria-labelledby="approach-title">
+      <div class="wrap">
+        <p class="section-title">cat approach.md</p>
+        <h2 id="approach-title" class="section-heading">How I work an incident</h2>
+        <ol class="how-grid">
+          <li class="how-step"><h3>Detect and scope</h3><p>What is broken, for whom, since when. Check dashboards and alerts, and agree on one incident channel.</p></li>
+          <li class="how-step"><h3>Stabilize first</h3><p>Roll back, scale, fail over or replace the bad pod. Users first, root cause second.</p></li>
+          <li class="how-step"><h3>Find the first error</h3><p>Build a timeline. The loudest error is often an amplifier, not the cause.</p></li>
+          <li class="how-step"><h3>Prove the root cause</h3><p>Reproduce it, or show it with metrics, logs or the exact line of code. No guessing.</p></li>
+          <li class="how-step"><h3>Fix and prevent</h3><p>Ship the permanent fix plus a guardrail: an alert, a test, a policy or a runbook.</p></li>
+          <li class="how-step"><h3>Write it down</h3><p>A blameless review with numbers, so the next person can recognize the pattern in minutes.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="index" class="inc-section" aria-labelledby="index-title">
+      <div class="wrap">
+        <p class="section-title">ls incidents/</p>
+        <h2 id="index-title" class="section-heading">The incidents</h2>
+        <ul class="inc-index">
+          <li><a class="inc-card" href="#inc-01"><span class="inc-num">#01</span><h3>Spot reclaims took pods down for 7 minutes</h3><p>kubernetes · karpenter · aws</p></a></li>
+          <li><a class="inc-card" href="#inc-02"><span class="inc-num">#02</span><h3>A live-translation service failed in its biggest meeting</h3><p>reliability · capacity · containers</p></a></li>
+          <li><a class="inc-card" href="#inc-03"><span class="inc-num">#03</span><h3>OpenSearch went red: a retention policy failed silently</h3><p>observability · opensearch</p></a></li>
+          <li><a class="inc-card" href="#inc-04"><span class="inc-num">#04</span><h3>7,279 hidden restarts while docker said "Up"</h3><p>linux · docker · storage</p></a></li>
+          <li><a class="inc-card" href="#inc-05"><span class="inc-num">#05</span><h3>A database behind a public load balancer</h3><p>security · mysql · recovery</p></a></li>
+          <li><a class="inc-card" href="#inc-06"><span class="inc-num">#06</span><h3>RabbitMQ timeouts: cross-zone load balancing was off</h3><p>networking · nlb · kubernetes</p></a></li>
+          <li><a class="inc-card" href="#inc-07"><span class="inc-num">#07</span><h3>WebSockets dropped at exactly 60 seconds</h3><p>networking · alb · websocket</p></a></li>
+          <li><a class="inc-card" href="#inc-08"><span class="inc-num">#08</span><h3>A build server froze: kernel RCU stalls</h3><p>linux · kernel · ci/cd</p></a></li>
+          <li><a class="inc-card" href="#inc-09"><span class="inc-num">#09</span><h3>"The game lags": MongoDB collection scans</h3><p>database · mongodb · performance</p></a></li>
+          <li><a class="inc-card" href="#inc-10"><span class="inc-num">#10</span><h3>Half the requests failed: a poisoned cache in one pod</h3><p>kubernetes · application · debugging</p></a></li>
+          <li><a class="inc-card" href="#inc-11"><span class="inc-num">#11</span><h3>Autoscaling stopped: an SCP denied RunInstances</h3><p>karpenter · aws organizations</p></a></li>
+          <li><a class="inc-card" href="#inc-12"><span class="inc-num">#12</span><h3>One viewer, 1,247 WebRTC sessions, a frozen server</h3><p>linux · memory · webrtc</p></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="incidents" class="inc-section" aria-labelledby="incidents-title">
+      <div class="wrap">
+        <p class="section-title">cat incidents/*.md</p>
+        <h2 id="incidents-title" class="section-heading">Write-ups</h2>
+
+        <article class="inc" id="inc-01">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#01</span><span class="tag">kubernetes</span><span class="tag">karpenter</span><span class="tag">aws</span><span class="sev">impact: ~7 min down per spot reclaim</span></p>
+            <h3>Spot reclaims took pods down for 7 minutes: interruption handling was never wired</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Karpenter had an SQS interruption queue configured, but no EventBridge rules sent events to it. It never received the 2-minute spot warning, so nodes died without a drain, and an EBS volume stayed attached to the dead node for about 6 minutes.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>A single-replica StatefulSet with an EBS volume, running on spot capacity, "restarted on its own" and stayed down about 7 minutes each time.</li>
+            <li>In the same cluster, a single-replica real-time worker was evicted in the middle of a live session by Karpenter consolidation (<code>Underutilized</code>).</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Pod events: the new pod was stuck in <code>ContainerCreating</code>. The VolumeAttachment of the ReadWriteOnce volume still pointed at the dead node until Kubernetes force-detached it about 6 minutes later.</li>
+            <li><code>aws ec2 describe-instances</code> showed <code>Server.SpotInstanceTermination</code> and the spot request said <code>instance-terminated-no-capacity</code>. It was a reclaim, not a crash.</li>
+            <li>Karpenter logs had no <code>disrupting node(s)</code> line (that line marks consolidation). There was only <code>tainted node</code>, after the instance was already gone.</li>
+            <li>Karpenter was configured with an interruption queue and the queue existed, but <code>aws events list-rule-names-by-target</code> for it returned nothing.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Interruption handling was half-configured: queue yes, EventBridge rules no. Without the 2-minute notice, Karpenter could not cordon, drain and launch a replacement early. The volume detach delay turned a short restart into a 7-minute outage.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Created the 5 EventBridge rules from Karpenter's reference template (spot interruption, rebalance recommendation, scheduled change, instance state change, capacity reservation interruption) with the queue as target. The queue policy allows EventBridge and denies non-TLS access, and retention is set to 300 seconds.</li>
+            <li>Verified with Karpenter's own metric <code>karpenter_interruption_received_messages_total</code> (CloudWatch SQS metrics lag behind) and kept a rollback script.</li>
+            <li>Moved single-replica, latency-sensitive workloads to an on-demand NodePool with <code>karpenter.sh/do-not-disrupt</code>, plus the pool's toleration (without it, pods stay Pending).</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>PDBs and do-not-disrupt only stop voluntary disruption (consolidation, drift). Against a spot reclaim, only the interruption warning, extra replicas or on-demand capacity help.</li>
+            <li>Tell consolidation and reclaim apart in the logs before choosing a fix.</li>
+            <li>Verify an integration by its metrics, not by the presence of a config value.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>Production pods on spot nodes were going down for about 7 minutes at random times.</dd>
+              <dt>Task</dt><dd>Find out why and stop the outages without giving up the spot savings.</dd>
+              <dt>Action</dt><dd>Traced the pod timeline to a spot reclaim and an EBS volume stuck on the dead node. Found that Karpenter's interruption queue had no EventBridge rules, wired the 5 rules and verified them with Karpenter metrics. Moved single-replica workloads to on-demand capacity with do-not-disrupt.</dd>
+              <dt>Result</dt><dd>Karpenter now gets the 2-minute warning and drains nodes ahead of time. The 7-minute outages on spot reclaims stopped.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>What is the difference between a spot interruption and consolidation?</dt>
+              <dd>An interruption is AWS taking the capacity back with a 2-minute warning; it is involuntary. Consolidation is Karpenter removing or replacing nodes to save money; it is voluntary and respects PDBs and do-not-disrupt.</dd>
+              <dt>Why did the pod take 7 minutes instead of 30 seconds?</dt>
+              <dd>The volume was ReadWriteOnce and its attachment still referenced the terminated node, so the new pod could not mount it until the attach/detach controller force-detached it after about 6 minutes. A graceful drain releases the volume immediately.</dd>
+              <dt>How would you make a stateful service tolerate spot?</dt>
+              <dd>Multiple replicas spread across AZs with a PDB, interruption handling wired, graceful shutdown (preStop hook, enough grace period). Or keep it on on-demand capacity if it cannot be replicated.</dd>
+              <dt>What is the downside of do-not-disrupt?</dt>
+              <dd>It also blocks drift and expiry, so the node is not patched or right-sized. Use it only for workloads that truly cannot move.</dd>
+            </dl>
+            <p class="review">review: karpenter disruption types · eventbridge → sqs · pdb semantics · ebs csi attach/detach · statefulsets</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-02">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#02</span><span class="tag">reliability</span><span class="tag">capacity</span><span class="tag">containers</span><span class="sev">impact: translation dropped 7 times in 15 min</span></p>
+            <h3>A live-translation service failed in its biggest meeting yet</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A 7-person, 4-language meeting (21 translation branches) pushed the agent past its 2-CPU limit. The reconnect storm then hit the speech-to-text vendor's limit of 10 concurrent streams, a busy-loop bug froze the worker, and a shell as PID 1 swallowed SIGTERM, so old pods never drained.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Translation latency rose from 7–11 s to 34–45 s. Then the media server (SFU) closed the agent with <code>NEGOTIATE_FAILED</code>, and the agent was killed and replaced 7 times in 15 minutes. People moved to a smaller room, where it worked.</li>
+            <li>Kubernetes showed the pod as Ready the whole time.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Built a timeline from the logs. The first two drops had no vendor errors at all, so this was pure overload. The first HTTP 429 from the vendor came only after the restart, when the old and new pods held streams at the same time.</li>
+            <li>cgroup stats showed CFS throttling in 16–62% of periods against a 2-core limit. The room needed about 2.8 cores. The SFU host itself was fine (15–30% CPU).</li>
+            <li>The vendor's concurrency API showed an organization-wide cap of 10 streams, shared by every environment and service that used the same key.</li>
+            <li>Reproduced locally: after the server closed the websocket, the STT plugin's receive loop kept getting an already-closed message without awaiting. It spun without yielding the asyncio event loop, the job froze with zero log lines, and the worker killed it after 60 seconds. Upstream had already fixed it.</li>
+            <li>The container started with <code>sh -c "python …"</code>, so PID 1 was the shell and it ignored SIGTERM. Python never drained; the old pod kept accepting new jobs for the whole 210-second grace period and was then killed.</li>
+            <li>The health check only tested a TCP port held by the parent process, so the pod looked healthy while every meeting on it was dead.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Load above the CPU limit was the trigger. Three latent bugs (a shared vendor cap, a busy-loop on a closed socket, PID 1 not forwarding signals) turned one overload into a crash loop. They had never shown up because no earlier meeting was this large; the previous record was 6 people and 3 languages.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>A fan-out redesign: each speaker is transcribed once and the turn is replayed to every language branch (one STT stream per speaker), with an overload guard and a per-room cost ceiling. It rolled out in stages behind one flag; stage 2 was live in production the next day.</li>
+            <li>Signal and plugin fixes: exec-form entrypoint (or tini) so SIGTERM reaches Python and the worker drains, a backport of the upstream plugin fix, and CPU request and limit sized from measurement.</li>
+            <li>Agent dispatch deduplicated per room, with jitter. In an earlier incident, 5 browsers re-requested an agent within 240 ms, which opened about 52 STT streams in 14 seconds.</li>
+            <li>Recommended: separate vendor keys per environment, a health check based on active sessions instead of a port, and load tests sized as speakers × languages.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>At a new peak, latent bugs line up. Load-test the worst case, not the average.</li>
+            <li>Find the first error. Here the 429s were an amplifier, not the cause.</li>
+            <li>PID 1 must handle signals, or rolling updates kill sessions instead of draining them.</li>
+            <li>A health check must test what users need, not just an open port.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A live speech-translation service failed during its largest meeting so far: 7 people, 4 languages.</dd>
+              <dt>Task</dt><dd>Restore service, find the root cause and make large meetings safe.</dd>
+              <dt>Action</dt><dd>Rebuilt the timeline and showed that overload came first and the vendor 429s came later. Measured CPU throttling, found the shared 10-stream cap, reproduced a busy-loop bug in the STT plugin and found PID 1 swallowing SIGTERM. Drove a fan-out redesign that transcribes each speaker once.</dd>
+              <dt>Result</dt><dd>Stage 2 of the redesign was live in production the next day, together with a clear fix list for signals, the plugin and quotas, and a load-test model based on speakers × languages.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>How did you know the 429s were not the cause?</dt>
+              <dd>Timestamps. The first two disconnects had no 429 at all. The first 429 came after the restart, when two pods overlapped.</dd>
+              <dt>What is CFS throttling and how do you see it?</dt>
+              <dd>It is the kernel's CPU bandwidth control: a container that uses up its quota in a 100 ms period is paused until the next period. Check <code>cpu.stat</code> in the cgroup or <code>container_cpu_cfs_throttled_periods_total</code>.</dd>
+              <dt>Why does <code>sh -c</code> as PID 1 break graceful shutdown?</dt>
+              <dd>PID 1 has no default signal handlers and the shell does not forward SIGTERM to its child. The app never hears it and is killed after the grace period. Use exec form, <code>exec</code> in the script, or an init such as tini.</dd>
+              <dt>How do you stop a thundering herd of reconnects?</dt>
+              <dd>Deduplicate on the server (one in-flight request per room with a short TTL) and add jitter and exponential backoff on the clients.</dd>
+            </dl>
+            <p class="review">review: asyncio event loop blocking · cgroup cpu limits · pid 1 &amp; signals · rate limits &amp; backoff · readiness vs liveness</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-03">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#03</span><span class="tag">observability</span><span class="tag">opensearch</span><span class="tag">kubernetes</span><span class="sev">impact: log search outages · disk 80%</span></p>
+            <h3>OpenSearch went red, and a retention policy had silently failed for months</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>The production retention policy was rejected with HTTP 400 at deploy time, but the init script printed success. Production logs were never deleted, shards piled up, and every node move caused a long, heavy recovery.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Dashboards returned "internal server error": the parent circuit breaker tripped at 99% of a 2 GB heap after the pod moved to a new node and reloaded about 3,650 primary shards.</li>
+            <li>Later the cluster went RED twice in 21 hours after the pod moved; each recovery took 13–15 minutes.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li><code>_cluster/allocation/explain</code> said <code>can_allocate: yes</code> and <code>throttled</code>: RED meant a slow recovery, not data loss.</li>
+            <li>The policy init script logged "done (0)", but <code>$?</code> came from <code>echo</code>, not from <code>curl</code>. The real response, in a log file inside the pod, was HTTP 400: two ISM templates with overlapping index patterns cannot share the same priority.</li>
+            <li>ISM templates attach only when an index is created, so even a fixed policy would not manage existing indices. Production indices were 178 days old.</li>
+            <li>Shard math: 33 GB over 2,332 shards is about 14 MB per shard. Daily indices for every small service created thousands of tiny shards; 40 small families held 65% of the shards but only 4% of the data.</li>
+            <li>Recovery speed was limited by default throttles (4 concurrent initial primary recoveries), not by bandwidth: 33 GB at 40 MB/s is about 14 seconds.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>An unchecked API call in a postStart hook plus a priority collision left production with no retention, and one daily index per service multiplied the shard count. A single-node cluster on movable nodes made every move a full recovery.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Gave each policy a unique priority, attached existing indices with <code>_plugins/_ism/add</code> and purged 2,000 old indices (71 GB). Disk went from 80% to 38% and shards from 4,947 to 2,683.</li>
+            <li>Raised the heap from 2 to 3 GB and set replicas to 0 on this single-node cluster, which made it GREEN with no phantom replicas.</li>
+            <li>Raised recovery concurrency (initial primaries 4 → 32, concurrent recoveries 8, larger chunk and bandwidth limits). Recovery now goes from 64% to 99.4% in under 2 minutes instead of about 15.</li>
+            <li>Protected the pod from consolidation, created the first S3 snapshot repository (with IRSA), and changed the RED alert from <code>for: 5m</code> to <code>15m</code> so a normal recovery no longer pages anyone.</li>
+          </ul>
+          <p class="oops"><strong>The mistake I tell in interviews:</strong> a wildcard <code>_ism/add/*dev*</code> also matched index aliases, so a 14-day policy deleted 132 small dev indices (214 MB). Since then I run <code>_cat/aliases</code> before any wildcard write.</p>
+          <h4>Lessons</h4>
+          <ul>
+            <li>Check the result, not the exit code of a different command. Read the real log.</li>
+            <li>Plan shards: use rollover or monthly indices for small services. With monthly indices, <code>min_index_age</code> counts from index creation, so retention must be at least 60 days or fresh data gets deleted.</li>
+            <li>Recovery throttles are the cheapest lever for recovery time.</li>
+            <li>No snapshots means no backup, even for logs.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>Our logging cluster went red again and again, and search returned errors.</dd>
+              <dt>Task</dt><dd>Stabilize it and find out why it was so fragile.</dd>
+              <dt>Action</dt><dd>Proved RED was a throttled recovery. Found that the retention policy had been rejected for months while the script reported success. Fixed the priorities, attached old indices, purged 71 GB, and tuned heap, replicas and recovery throttles. Added snapshots.</dd>
+              <dt>Result</dt><dd>Disk 80% → 38%, shards down 46%, recovery under 2 minutes instead of about 15, and no more false alerts.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Why are too many small shards bad?</dt>
+              <dd>Every shard costs heap and file handles and is recovered on its own, and the cluster state grows. Aim for tens of GB per shard, use rollover and merge small indices.</dd>
+              <dt>Why did fixing the policy not clean the old indices?</dt>
+              <dd>ISM templates bind at index creation. Existing indices need an explicit add or change_policy call.</dd>
+              <dt>How would you make this cluster resilient?</dt>
+              <dd>At least 3 nodes on stable capacity with replicas, snapshots to S3, rollover-based ISM, and alerts on heap, disk watermarks and unassigned shards.</dd>
+              <dt>Tell me about a mistake you made.</dt>
+              <dd>The alias wildcard above: small blast radius in dev, and it changed how I run every wildcard operation.</dd>
+            </dl>
+            <p class="review">review: shards &amp; heap · circuit breakers · ism/ilm · disk watermarks · snapshot repositories</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-04">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#04</span><span class="tag">linux</span><span class="tag">docker</span><span class="tag">storage</span><span class="sev">impact: session replay silently broken for ~7 weeks</span></p>
+            <h3>A self-hosted analytics stack crash-looped 7,279 times while <code>docker ps</code> said "Up"</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>The object store hit its default limit of 8 volumes and its only volume went read-only. Uploads timed out, the ingestion service exited with code 0, and <code>restart: always</code> hid the loop. 33 GB of ZooKeeper logs and exhausted CPU credits made it worse.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Session replays stopped arriving and ingestion had gaps. Root disk was at 92%, CPU steal at 51% and load at 10.7.</li>
+            <li><code>docker ps</code> showed every container as Up.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li><code>docker inspect --format '{{.RestartCount}}'</code> returned 7,279, about one restart every 7 minutes. Exit code 0 plus <code>restart: always</code> made the crash loop invisible.</li>
+            <li>Logs: "S3 upload timed out after 120000ms", then an unhandled promise rejection and a shutdown. Each restart also killed every other consumer in that service.</li>
+            <li>The object store (SeaweedFS) said "No writable volumes". The volume server's default of 8 slots was full, and the only bucket volume (31.4 GB) had passed the 30 GB size limit, so it was read-only. A bigger disk did not help: the limit was slots, not space.</li>
+            <li>ZooKeeper autopurge had been disabled from day one, leaving 33 GB of transaction logs.</li>
+            <li>The burstable instance used standard credits with a balance of 0.17, so steal was 51% and CPU was pinned at the 40% baseline for 7 days.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Three unsafe defaults (8 volume slots, ZooKeeper autopurge off, standard CPU credits) plus a process that exits with code 0 on a fatal error.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Raised the volume slots to 30 and lowered the volume size limit to 8 GB, so new writable volumes appeared. After a restart of the service, restarts stayed at 0. Added a 30-day TTL for recordings.</li>
+            <li>Ran ZooKeeper cleanup live and enabled autopurge: disk 92% → 54% (36 GB freed) with no restart.</li>
+            <li>Switched the instance to unlimited credits (immediate, no reboot): steal 0%, load 2.46.</li>
+            <li>Later moved the main object storage to Amazon S3.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>Alert on restart counts; "Up" is not "healthy".</li>
+            <li>Exiting with code 0 on a fatal error is a bug.</li>
+            <li>Know the defaults of every stateful component you host.</li>
+            <li>On burstable instances, watch the CPU credit balance; a new instance type does not help if the credit mode stays standard.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A self-hosted product-analytics stack looked up, but session replay had been dead for weeks.</dd>
+              <dt>Task</dt><dd>Find the cause and restore ingestion without losing data.</dd>
+              <dt>Action</dt><dd>Found 7,279 hidden restarts and traced them to an object store out of volume slots. Freed 36 GB of ZooKeeper logs live and fixed CPU credit starvation.</dd>
+              <dt>Result</dt><dd>Restarts 0, disk 92% → 54%, CPU steal 51% → 0%, replay working again.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>How do you detect a crash loop that Docker hides?</dt>
+              <dd>Track the restart count (<code>docker inspect</code>, cAdvisor, or <code>kube_pod_container_status_restarts_total</code> in Kubernetes) and alert on its rate.</dd>
+              <dt>What is CPU steal?</dt>
+              <dd>Time the hypervisor did not give your vCPU. On burstable instances it often means the CPU credits ran out.</dd>
+              <dt>Why did adding disk not fix it?</dt>
+              <dd>The error was about writable volume slots. Each volume has a size cap and the server had a maximum number of volumes.</dd>
+            </dl>
+            <p class="review">review: docker restart policies &amp; exit codes · burstable credits · zookeeper maintenance · alerting on restarts</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-05">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#05</span><span class="tag">security</span><span class="tag">mysql</span><span class="tag">recovery</span><span class="sev">impact: production data at risk · recovered with no data loss</span></p>
+            <h3>A database behind a public load balancer: point-in-time recovery and lock-down</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A legacy setup left a MySQL instance running in Kubernetes reachable from the internet through a public Network Load Balancer, and its data had to be recovered. We restored it from EBS snapshots plus binary logs with no data loss, then removed the public path.</p>
+          </header>
+          <h4>What we found</h4>
+          <ul>
+            <li>The database Service was of type <code>LoadBalancer</code>, backed by an internet-facing NLB, with security groups wider than needed. It was a leftover from an old setup.</li>
+          </ul>
+          <h4>Recovery: point-in-time restore</h4>
+          <ol>
+            <li>Contain first: switched the Service to <code>ClusterIP</code> and tightened the security groups, so nothing new could reach the database.</li>
+            <li>Restore the data volume from the last good EBS snapshot.</li>
+            <li>Replay the binary logs from the snapshot's position up to just before the bad change (<code>mysqlbinlog --stop-datetime</code> or <code>--stop-position</code>).</li>
+            <li>Verify row counts and application behaviour, then put it back in service.</li>
+          </ol>
+          <h4>Hardening I drove afterwards</h4>
+          <ul>
+            <li>Closed internet-exposed database and admin ports across the AWS estate; access now goes through a managed prefix list.</li>
+            <li>Cut public S3 buckets from 15 to 2, and added DNS Firewall alerting and VPC Flow Logs.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>Snapshots plus binary logs give point-in-time recovery, but only if binlog retention covers the gap and restores are tested.</li>
+            <li>In Kubernetes on AWS, a Service of type <code>LoadBalancer</code> is internet-facing unless you mark it internal. Review every one.</li>
+            <li>Audit security groups for <code>0.0.0.0/0</code> on database and admin ports continuously, not once.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A legacy MySQL in Kubernetes was reachable from the internet, and its data needed recovery.</dd>
+              <dt>Task</dt><dd>Recover with no data loss and close the hole.</dd>
+              <dt>Action</dt><dd>Contained first, restored from EBS snapshots, replayed binary logs to the right point, verified, then moved the Service to ClusterIP and locked down the security groups.</dd>
+              <dt>Result</dt><dd>Full recovery with no data loss. Later I led a wider cleanup of open ports and public buckets.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>How does point-in-time recovery work for MySQL?</dt>
+              <dd>Restore a full backup or snapshot, then replay the binary logs from the backup's binlog position up to the target time or position.</dd>
+              <dt>What do you do first in a suspected breach?</dt>
+              <dd>Contain (cut access, rotate credentials), preserve evidence, find the scope with logs (VPC Flow Logs, database logs), then recover and harden.</dd>
+              <dt>How do you prevent this class of issue?</dt>
+              <dd>Internal load balancers by default, admission policies that block public load balancers for databases, regular security-group audits, private endpoints and least privilege.</dd>
+            </dl>
+            <p class="review">review: mysql binlog &amp; pitr · ebs snapshots · k8s service types &amp; aws lb annotations · incident response basics</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-06">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#06</span><span class="tag">networking</span><span class="tag">aws nlb</span><span class="tag">kubernetes</span><span class="sev">impact: clients could not reconnect for ~2 min</span></p>
+            <h3>RabbitMQ clients timed out after node churn: cross-zone load balancing was off</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A broker pod drained during a spot reclaim. Its NLB had cross-zone load balancing disabled and the drained pod was the only target in its AZ, so every client that resolved that AZ's IP got TCP timeouts while the other AZ was healthy.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>A consumer lost its broker in the middle of a live event, and its reconnects timed out instead of failing over.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>The time matched a spot reclaim. Karpenter drained the node, and the broker's preStop <code>rabbitmq-upgrade drain</code> put it into maintenance mode (<code>CONNECTION_FORCED</code>). It was gone for 67 seconds.</li>
+            <li>The NLB had cross-zone off: DNS returns one IP per AZ, and each IP only reaches targets in its own AZ. AZ-a had a single broker pod, and its per-AZ <code>HealthyHostCount</code> dropped to 0 for about 2 minutes while AZ-c stayed healthy.</li>
+            <li>History: the broker pods had changed nodes 826 times in 3 months (about 10 a day), half from spot reclaims and half from consolidation. Kubernetes events last only an hour, so I rebuilt the history from CloudTrail (<code>BidEvictedEvent</code> plus the volume's <code>AttachVolume</code> calls).</li>
+            <li>Checked where connections land by opening N connections to one NLB IP and comparing <code>/proc/net/tcp6</code> in each pod. On dual-stack sockets IPv4 shows up as <code>::ffff:</code>, so reading only <code>/proc/net/tcp</code> shows zero connections.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Zonal NLB routing plus an uneven pod spread: one AZ had a single target, so draining it blackholed that AZ's IP.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Enabled cross-zone load balancing on the target groups. Connections to the AZ-a IP now spread across all pods: before 9/0/0, after 5/1/3. Rollback is one CLI call.</li>
+            <li>Recommended: clients reconnect with backoff and try other endpoints; spread broker pods evenly across AZs.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>NLB cross-zone is off by default, and then each AZ IP is its own failure domain.</li>
+            <li>Brokers on spot see constant churn; design clients for it.</li>
+            <li>When Kubernetes events are gone, CloudTrail and per-AZ load balancer metrics still tell the story.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A message consumer lost its broker mid-event and could not reconnect for two minutes.</dd>
+              <dt>Task</dt><dd>Explain the timeouts and stop them.</dd>
+              <dt>Action</dt><dd>Tied the drop to a spot drain, found cross-zone disabled with a single target in one AZ, rebuilt 3 months of churn from CloudTrail and tested how connections spread across pods.</dd>
+              <dt>Result</dt><dd>Turned on cross-zone; any NLB IP now reaches healthy pods in every AZ.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>What does cross-zone load balancing change?</dt>
+              <dd>With it on, each load balancer node can send traffic to targets in any enabled AZ; with it off, only to its own AZ. It is on by default for ALB and off for NLB, and inter-AZ traffic costs apply.</dd>
+              <dt>Why did clients time out instead of retrying another IP?</dt>
+              <dd>They resolved once and kept one IP. A TCP SYN to an AZ with no healthy target just times out.</dd>
+              <dt>How would you run RabbitMQ on Kubernetes more safely?</dt>
+              <dd>The Cluster Operator with 3 replicas across AZs, quorum queues, a PDB, stable capacity, and clients with reconnect and backoff.</dd>
+            </dl>
+            <p class="review">review: nlb vs alb · cross-zone &amp; az affinity · rabbitmq maintenance mode &amp; quorum queues · cloudtrail forensics</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-07">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#07</span><span class="tag">networking</span><span class="tag">aws alb</span><span class="tag">websocket</span><span class="sev">impact: periodic "lag" and 5-second reconnects</span></p>
+            <h3>WebSocket clients dropped at exactly 60 seconds: browser throttling met the ALB idle timeout</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Background browser tabs slowed the client's message loop to about one message per minute. The ALB closes idle connections after 60 seconds, so when a gap reached 60.0 seconds, the connection died.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Players reported that "the game server is lagging". Server p95 was under 35 ms, database CPU was 2–3%, and there were almost no slow requests.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Ruled out the server and the database first: p95, CPU and slow logs were all healthy.</li>
+            <li>Looked at session removals for real users: 2–5 drops per 15 minutes, each taking about 5 seconds to reconnect.</li>
+            <li>Client message gaps grew 30 s → 57 s → 59 s → 60.0 s, then the connection dropped, always at exactly 60 seconds and only with the tab in the background. Chrome's intensive timer throttling slowed the WebGL loop to about one message per minute.</li>
+            <li>The server's own idle timeout was 120 seconds, so the server was not closing the connection. The ALB idle timeout was 60 seconds, and ALB access logs showed the <code>wss</code> connection closing within 1 ms of the server's "remove user".</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>The load balancer's idle timeout was shorter than the client's worst-case gap between messages.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Raise the ALB idle timeout to 120–180 seconds and add a server-side ping (or protocol heartbeat) under 60 seconds that does not depend on the client's throttled loop. Make reconnects seamless.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>Not every "lag" is the server or the database; measure before tuning.</li>
+            <li>Every proxy in the path has an idle timeout (ALB 60 s by default, NGINX <code>proxy_read_timeout</code> 60 s). WebSockets need heartbeats below the smallest one.</li>
+            <li>Browsers throttle timers in background tabs.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>Users reported lag while every server metric was green.</dd>
+              <dt>Task</dt><dd>Find the real cause.</dd>
+              <dt>Action</dt><dd>Ruled out the server and the database, then matched client message gaps to disconnects and the exact 60.0 seconds to the ALB idle timeout, confirmed with ALB access logs.</dd>
+              <dt>Result</dt><dd>Root cause proven with logs; the fix is one setting plus a heartbeat.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Where can a WebSocket be cut in AWS?</dt>
+              <dd>The browser, a CDN, ALB/NLB idle timeouts, ingress or proxy timeouts, and the application's own idle timeout.</dd>
+              <dt>Should the ping come from the client or the server?</dt>
+              <dd>The server (or protocol ping frames), because background tabs throttle client timers.</dd>
+              <dt>How did you prove it was not the server?</dt>
+              <dd>The server's idle timeout was 120 seconds, but drops happened at 60.0 seconds, the ALB value, and ALB logs closed the connection at that exact moment.</dd>
+            </dl>
+            <p class="review">review: websocket keepalive · alb idle timeout · browser timer throttling · alb access logs</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-08">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#08</span><span class="tag">linux</span><span class="tag">kernel</span><span class="tag">ci/cd</span><span class="sev">impact: CI failing · hard resets needed</span></p>
+            <h3>An on-prem build server froze: kernel RCU stalls, not CPU or memory</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Starting and stopping containers needed an expedited RCU grace period, but one CPU core sat in a deep idle state and never answered. Hundreds of processes queued in uninterruptible sleep behind one kernel lock.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Jenkins jobs failed with "docker run … Timeout after 180 seconds".</li>
+            <li>SSH accepted connections but could not run commands, while running containers kept serving.</li>
+            <li>It came back after 2.5 days, then 4 days, then 2 days, and finally 5 minutes after a reboot.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Load average was 231 while only 16 of 125 GB RAM was used and the disk had plenty of space: not a resource problem.</li>
+            <li><code>ps -eo stat | grep -c ^D</code> returned about 240 processes in uninterruptible sleep (D state), mostly <code>runc</code>.</li>
+            <li><code>dmesg</code>: "rcu_preempt detected expedited stalls", and the NMI backtrace showed the stalled CPU idling in <code>intel_idle</code>.</li>
+            <li>Kernel stacks: the first stuck task waited in <code>synchronize_rcu_expedited</code> (mount namespace release when a container exits) while holding the lock, and every later <code>runc</code> queued behind it.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>A kernel and CPU interaction: expedited RCU grace periods never completed because a core in a deep C-state did not respond. This is a known class of issue on this desktop CPU generation.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Workaround that shipped: moved the build jobs to another on-prem node, where builds were also faster (4m33s vs about 8 minutes). Added the agent prerequisites (git-lfs and the AWS CLI on the host, because those steps run outside the build container) to a checklist.</li>
+            <li>Recommended mitigations: <code>kernel.rcu_normal=1</code>, the boot parameter <code>intel_idle.max_cstate=1</code>, and a BIOS and microcode update.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>High load with idle CPUs and many D-state processes means tasks are blocked in the kernel. Read <code>dmesg</code> and the kernel stacks.</li>
+            <li>A reboot that helps for less time each round is not a fix.</li>
+            <li>Find the first error: at the end of the log, a credential-type error was hiding "aws: not found".</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>Our on-prem CI host kept freezing and builds failed.</dd>
+              <dt>Task</dt><dd>Find out why and keep CI running.</dd>
+              <dt>Action</dt><dd>Showed it was not CPU, RAM or disk, found about 240 D-state tasks behind an expedited RCU stall, moved the builds to another node and proposed kernel and BIOS mitigations.</dd>
+              <dt>Result</dt><dd>CI was green again, and builds got faster (4m33s vs about 8 minutes).</dd>
+            </dl>
+            <dl class="qa">
+              <dt>What is D state?</dt>
+              <dd>Uninterruptible sleep, usually waiting for I/O or a kernel lock. <code>kill -9</code> does not work on it, and it counts towards the load average.</dd>
+              <dt>What is RCU?</dt>
+              <dd>Read-Copy-Update, a kernel synchronization mechanism: writers wait for a grace period until all readers are done. Expedited grace periods force this with interrupts to every CPU.</dd>
+              <dt>How do you debug a host where you cannot run new commands?</dt>
+              <dd>Use a session that is already open or the console, dump blocked tasks with <code>echo w &gt; /proc/sysrq-trigger</code>, and read the persistent journal after the reboot.</dd>
+            </dl>
+            <p class="review">review: linux process states · load average · dmesg &amp; sysrq · namespaces in container runtimes · c-states</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-09">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#09</span><span class="tag">database</span><span class="tag">mongodb</span><span class="tag">performance</span><span class="sev">impact: 1–2.5 s requests · database at 100% CPU</span></p>
+            <h3>"The game lags": MongoDB collection scans on a small instance</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>Index annotations in the code were never applied, because auto-index creation was off and there was no migration. Hot queries scanned 133,000 to 269,000 documents.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Players reported stutter during tournaments. Slow requests clustered at even minutes, while the app pod used about 0.1 of its 1 CPU.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>The app pod was healthy. The database host (a t3.small) went from 2% CPU to 40–48% on average, with 99.8% peaks once play started, and its CPU credits were falling.</li>
+            <li>The mongod slow log showed 30–48 seconds of query time per minute, almost all on one collection with 269,000 documents:
+              <ul>
+                <li><code>find {eventId}</code> was a COLLSCAN, although the code declared a unique index on that field.</li>
+                <li><code>find {stream, sourceEventId}</code> used only a prefix of another index and examined 133,000 documents (1–2.5 s).</li>
+              </ul>
+            </li>
+            <li>Spring Data auto-index creation was disabled and the collection had no create migration, so the annotations never became indexes.</li>
+            <li>A 7-day TTL index deleted nothing: 214,000 of 220,000 rows stored the timestamp as a number, and TTL only works on Date values.</li>
+            <li>A week later, a second hotspot: the users collection had only the <code>_id</code> index, and a case-insensitive email lookup (with a collation) ran once per seat per request. Bots polling every second pushed the database to 100% CPU.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Missing indexes in production, plus per-request lookups multiplied by polling.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Gave the team that owns the schema an exact fix: a unique index on <code>eventId</code>, a compound index on <code>{stream, sourceEventId}</code>, an email index with the same collation as the query, a backfill that converts timestamps so the TTL works, and caching of user lookups. It went in as their migration.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>ORM index annotations are not a migration. Manage indexes explicitly.</li>
+            <li>A TTL index needs a Date field; a collation query needs an index with the same collation.</li>
+            <li>Check the database slow log before scaling the application.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>Players reported lag during tournaments.</dd>
+              <dt>Task</dt><dd>Find the bottleneck.</dd>
+              <dt>Action</dt><dd>Ruled out the app, read the MongoDB slow log, found collection scans on two collections, and traced them to index annotations that were never applied and a TTL on the wrong data type.</dd>
+              <dt>Result</dt><dd>Root cause and exact index changes delivered to the owning team the same day.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>How do you find slow queries in MongoDB?</dt>
+              <dd>The profiler or slow query log, then <code>explain("executionStats")</code>: look for COLLSCAN and compare docsExamined with nReturned.</dd>
+              <dt>Why did the unique annotation not create an index?</dt>
+              <dd>Recent Spring Data versions disable auto-index creation by default, so indexes must come from a migration or explicit index creation.</dd>
+              <dt>How do you order fields in a compound index?</dt>
+              <dd>Follow the ESR rule: Equality fields first, then Sort, then Range.</dd>
+            </dl>
+            <p class="review">review: mongodb indexes &amp; explain · esr rule · ttl indexes · collation · n+1 queries</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-10">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#10</span><span class="tag">kubernetes</span><span class="tag">application</span><span class="tag">debugging</span><span class="sev">impact: ~50% of admin requests failed</span></p>
+            <h3>Half the requests failed: a poisoned in-process cache in one long-lived pod</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A UI library cached a schema map in process-global memory, keyed only by collection name. If the first request that built it was unauthenticated, the map was built from a stripped config and stayed broken until restart. With two replicas behind an ALB, about half of the requests hit the bad pod.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>A CMS admin page "sometimes shows data, sometimes not". Locally, everything worked.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Pod logs had a TypeError during server-side rendering, in minified code. I de-minified it by downloading the exact package versions (<code>npm pack</code>) and searching them: the client field schema map was missing an entry that the server map had.</li>
+            <li>Found the cache: stored on <code>global</code>, keyed only by the collection slug, alive for the life of the process.</li>
+            <li>Evidence: the oldest pod (4 hours 23 minutes) had logged 69 errors, freshly started pods had logged 0. Same image, same environment, same database.</li>
+            <li>Reproduced it with a script: if the first build was authenticated, the map had 17 entries and worked; if it was unauthenticated, it had 3 entries and crashed.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>A cache poisoned by the first unauthenticated request, plus round-robin over two replicas, gave about 50% failures.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Mitigation: scaled to one replica and restarted the rollout through Git. ArgoCD self-heal reverts <code>kubectl scale</code>, and scaling down removes the newest pod first, which keeps the bad one, so a rollout restart was required.</li>
+            <li>Root fix: a <code>pnpm patch</code> so an unauthenticated config never reads or writes the shared cache. The Dockerfile must also copy <code>patches/</code> and <code>pnpm-workspace.yaml</code>, or the patch silently does not apply. Upgrading the library did not help; the latest version had the same code.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>"Sometimes" plus multiple replicas: look for per-pod state.</li>
+            <li>Process-global caches need complete keys (who, what, which version).</li>
+            <li>Verify that a patch is really inside the image.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A production admin page failed at random but worked locally.</dd>
+              <dt>Task</dt><dd>Find out why it was intermittent.</dd>
+              <dt>Action</dt><dd>De-minified the stack trace, found a process-global cache poisoned by unauthenticated requests, proved it per pod (69 errors vs 0) and reproduced it with a script.</dd>
+              <dt>Result</dt><dd>Mitigated the same day, then delivered a library patch with a reproducer.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>How do you debug minified production errors?</dt>
+              <dd>Use source maps if you have them; otherwise download the exact package version and search for the code around the error.</dd>
+              <dt>Why did scaling down keep the bad pod?</dt>
+              <dd>When a ReplicaSet scales down, it prefers to delete the newest pods.</dd>
+              <dt>How do you avoid cache poisoning?</dt>
+              <dd>Key the cache by everything that changes the value, never cache error or unauthenticated variants, add a TTL and expose cache health.</dd>
+            </dl>
+            <p class="review">review: replicaset scale-down order · gitops self-heal · ssr caches · source maps</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-11">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#11</span><span class="tag">karpenter</span><span class="tag">aws organizations</span><span class="sev">impact: no new nodes · CI stuck</span></p>
+            <h3>Autoscaling stopped cluster-wide: an organization SCP denied ec2:RunInstances</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A service control policy at the AWS Organizations level blocked Karpenter from launching instances. All 7 NodePools used one EC2NodeClass, so the whole cluster lost scale-out at once.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>Pods stayed Pending ("0/14 nodes are available … untolerated taints") and no NodeClaims were created. Existing nodes kept running.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>No NodeClaims meant Karpenter was not even trying; the NodePools were <code>Ready=False</code>.</li>
+            <li>The EC2NodeClass conditions said <code>RunInstancesAuthCheckFailed</code>: not authorized to call <code>ec2:RunInstances</code> because of a service control policy.</li>
+            <li>All 7 NodePools pointed at that single EC2NodeClass.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>A guardrail outside the cluster (an SCP), plus a shared EC2NodeClass as a single point of failure.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Pinned CI to a pool that still had capacity, escalated the SCP to the organization admins with the exact evidence, and documented a one-line health check: <code>kubectl get ec2nodeclass default -o jsonpath='{.status.conditions}'</code>.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>When nodes do not appear, check NodeClass and NodePool conditions before digging into the scheduler.</li>
+            <li>Alert on NodePool and NodeClass <code>Ready=False</code>.</li>
+            <li>The erosion is silent: nothing breaks until a node needs replacing, and then it cannot be replaced.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>New pods stayed Pending and CI stopped.</dd>
+              <dt>Task</dt><dd>Restore scaling.</dd>
+              <dt>Action</dt><dd>Noticed there were no NodeClaims, read the NodeClass condition and found an organization-level SCP denying RunInstances. Unblocked CI by pinning it to a pool with capacity and escalated the SCP.</dd>
+              <dt>Result</dt><dd>CI was back the same day, and the owners got the root cause with evidence.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>What is an SCP?</dt>
+              <dd>An AWS Organizations policy that sets the maximum permissions for accounts. An IAM allow cannot override an SCP deny.</dd>
+              <dt>Why did one problem break every NodePool?</dt>
+              <dd>They shared one EC2NodeClass (same IAM role, AMI and subnets), so they were one failure domain.</dd>
+            </dl>
+            <p class="review">review: karpenter nodepool &amp; ec2nodeclass · scp vs iam evaluation · pending pod triage</p>
+          </details>
+        </article>
+
+        <article class="inc" id="inc-12">
+          <header>
+            <p class="inc-meta"><span class="inc-num">#12</span><span class="tag">linux</span><span class="tag">memory</span><span class="tag">webrtc</span><span class="sev">impact: a streaming server unresponsive for ~11 hours</span></p>
+            <h3>One viewer opened 1,247 WebRTC sessions and froze a streaming server</h3>
+            <p class="inc-tldr"><strong>TL;DR</strong>A client in a retry loop opened about one session every 3 seconds. Memory leaked inside the media server until the kernel was thrashing the page cache. Nothing was killed, so nothing restarted.</p>
+          </header>
+          <h4>Symptoms</h4>
+          <ul>
+            <li>SSM commands were undeliverable, the instance status check was impaired, network out was 0 and CPU was about 10% (iowait).</li>
+            <li>A ping alert fired for 11 hours, but nobody acted on it.</li>
+          </ul>
+          <h4>Investigation</h4>
+          <ol>
+            <li>Thrashing signature: EBS read operations went from 700 per hour to 4.4 million per hour while writes stayed flat; the page cache dropped from 1,040 MB to 38 MB; there was no OOM kill.</li>
+            <li>Container logs survived the reboot: 1,268 WebRTC sessions that day, 1,247 of them from one viewer, each lasting about 2 seconds. It was a client reconnect loop caused by a broken H.264 stream.</li>
+            <li>Memory kept climbing after the churn stopped, so closed sessions were not being freed inside the media server.</li>
+          </ol>
+          <h4>Root cause</h4>
+          <p>Unbounded session churn from one client, a leak in the media server, and no memory safety net on the host.</p>
+          <h4>Fix</h4>
+          <ul>
+            <li>Hardened both the dev and prod hosts: swap plus earlyoom (which prefers killing the media server over system services), <code>min_free_kbytes</code> and <code>kernel.panic</code>.</li>
+            <li>Added node_exporter with per-container memory metrics, CloudWatch alarms with automatic reboot and recovery, logs shipped to OpenSearch, and a metric for readers per stream.</li>
+          </ul>
+          <h4>Lessons</h4>
+          <ul>
+            <li>"No OOM kill" does not mean healthy; thrashing can freeze a box for hours.</li>
+            <li>An alert nobody watches is not monitoring.</li>
+            <li>Rate-limit sessions per client.</li>
+          </ul>
+          <details class="drill">
+            <summary>In 60 seconds + deep-dive Q&amp;A</summary>
+            <dl class="star">
+              <dt>Situation</dt><dd>A streaming server became unreachable for hours.</dd>
+              <dt>Task</dt><dd>Find out why and stop it from happening again.</dd>
+              <dt>Action</dt><dd>Recognized memory thrashing from the EBS read pattern, traced it to 1,247 sessions from one viewer, and hardened the dev and prod hosts with memory guards, metrics and auto-recovery alarms.</dd>
+              <dt>Result</dt><dd>The hosts now recover on their own, and per-container memory and per-stream readers are visible.</dd>
+            </dl>
+            <dl class="qa">
+              <dt>Why was there no OOM kill?</dt>
+              <dd>The kernel kept reclaiming page cache instead of killing anything. The system was very slow but never truly out of memory: classic thrashing. earlyoom or systemd-oomd act earlier.</dd>
+              <dt>How did you recognize thrashing?</dt>
+              <dd>Huge read IOPS with flat writes, high iowait and an almost empty page cache.</dd>
+            </dl>
+            <p class="review">review: linux memory reclaim &amp; oom killer · swap &amp; earlyoom · ec2 status checks &amp; auto-recovery · webrtc session lifecycle</p>
+          </details>
+        </article>
+      </div>
+    </section>
+
+    <section id="questions" class="inc-section" aria-labelledby="questions-title">
+      <div class="wrap">
+        <p class="section-title">grep -l "interview" incidents/*</p>
+        <h2 id="questions-title" class="section-heading">Common questions, and the story I'd tell</h2>
+        <ul class="q-map">
+          <li><span>Tell me about the hardest outage you handled.</span><span><a href="#inc-02">#02</a><a href="#inc-03">#03</a></span></li>
+          <li><span>Tell me about a mistake you made.</span><span><a href="#inc-03">#03</a></span></li>
+          <li><span>Walk me through a Kubernetes issue you debugged.</span><span><a href="#inc-01">#01</a><a href="#inc-10">#10</a><a href="#inc-11">#11</a></span></li>
+          <li><span>A networking problem you solved?</span><span><a href="#inc-06">#06</a><a href="#inc-07">#07</a></span></li>
+          <li><span>How do you troubleshoot a slow application?</span><span><a href="#inc-09">#09</a><a href="#inc-07">#07</a></span></li>
+          <li><span>Linux troubleshooting experience?</span><span><a href="#inc-08">#08</a><a href="#inc-12">#12</a><a href="#inc-04">#04</a></span></li>
+          <li><span>Have you handled a security incident?</span><span><a href="#inc-05">#05</a></span></li>
+          <li><span>How do you balance cost and reliability?</span><span><a href="#inc-01">#01</a><a href="#inc-04">#04</a></span></li>
+          <li><span>How do you know your monitoring actually works?</span><span><a href="#inc-04">#04</a><a href="#inc-03">#03</a><a href="#inc-02">#02</a><a href="#inc-12">#12</a></span></li>
+          <li><span>Something outside your control broke production?</span><span><a href="#inc-11">#11</a><a href="#inc-02">#02</a></span></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer">
+    <div class="wrap footer-inner">
+      <p class="footer-line">© 2026 Bui Thanh Tai · <a href="../">back to portfolio</a></p>
+      <p class="footer-line"><a href="https://github.com/taibt-devops/portfolio/actions" rel="noopener" target="_blank">deployed via GitHub Actions <span class="t-ok">✓</span></a></p>
+    </div>
+  </footer>
+  <script src="../assets/js/main.js" defer></script>
+</body>
+</html>
