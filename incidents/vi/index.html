@@ -34,6 +34,7 @@
         <li><a href="#approach">cách làm</a></li>
         <li><a href="#index">sự cố</a></li>
         <li><a href="#questions">câu hỏi</a></li>
+        <li><a href="#knowledge">kiến thức</a></li>
         <li><a href="../../">portfolio</a></li>
         <li><a class="btn btn-ghost" href="../../cv/BUI_THANH_TAI_CV.pdf" download>tải cv</a></li>
       </ul>
@@ -46,7 +47,7 @@
         <p class="lang-switch"><a href="../" hreflang="en" lang="en">English</a><span aria-current="page">Tiếng Việt</span></p>
         <p class="hero-kicker">// sổ tay sự cố · aws · kubernetes · linux</p>
         <h1 id="page-title" class="inc-title">Những sự cố production tôi đã xử lý, <span class="grad">và bài học rút ra</span></h1>
-        <p class="inc-lede">12 sự cố thật trong quá trình vận hành AWS, Kubernetes và máy chủ Linux on-prem cho hơn 20 sản phẩm. Mỗi sự cố đi theo cùng một trình tự: triệu chứng, điều tra, nguyên nhân gốc, cách sửa và bài học. Kèm theo là bản kể trong 60 giây và những câu hỏi đào sâu mà người phỏng vấn hay hỏi.</p>
+        <p class="inc-lede">12 sự cố thật trong quá trình vận hành AWS, Kubernetes và máy chủ Linux on-prem cho hơn 20 sản phẩm. Mỗi sự cố đi theo cùng một trình tự: triệu chứng, điều tra, nguyên nhân gốc, cách sửa và bài học. Kèm theo là bản kể trong 60 giây và những câu hỏi đào sâu mà người phỏng vấn hay hỏi. Cuối trang là <a href="#knowledge">phần kiến thức nền</a> theo từng mảng, đáp án được ẩn để tự kiểm tra.</p>
         <p class="inc-note">Đã ẩn tên công ty, host và thông tin tài khoản. Số liệu là thật. Phỏng vấn bằng tiếng Anh thì luyện thêm với bản English.</p>
       </div>
     </section>
@@ -733,6 +734,545 @@
           <li><span>Làm sao biết monitoring của bạn thật sự hoạt động?</span><span><a href="#inc-04">#04</a><a href="#inc-03">#03</a><a href="#inc-02">#02</a><a href="#inc-12">#12</a></span></li>
           <li><span>Có lần nào thứ nằm ngoài tầm kiểm soát làm hỏng production?</span><span><a href="#inc-11">#11</a><a href="#inc-02">#02</a></span></li>
         </ul>
+      </div>
+    </section>
+
+    <section id="knowledge" class="inc-section" aria-labelledby="knowledge-title">
+      <div class="wrap">
+        <p class="section-title">cat prep/*.md</p>
+        <h2 id="knowledge-title" class="section-heading">Kiến thức cần chuẩn bị</h2>
+        <p class="k-lede">Kiến thức nền cho vị trí DevOps mid–senior, chia theo mảng. Mỗi mảng có các khái niệm phải nắm và những câu hay bị hỏi. Đáp án được ẩn: tự trả lời thành tiếng trước rồi mới mở ra so. Với các mẫu cấu hình, tự viết ra giấy trước rồi mới mở ra đối chiếu.</p>
+        <ul class="k-nav">
+          <li><a href="#k-answer">cách trả lời</a></li>
+          <li><a href="#k-write">viết tay</a></li>
+          <li><a href="#k-linux">linux &amp; mạng</a></li>
+          <li><a href="#k-container">container</a></li>
+          <li><a href="#k-k8s">kubernetes</a></li>
+          <li><a href="#k-cicd">ci/cd &amp; gitops</a></li>
+          <li><a href="#k-terraform">terraform</a></li>
+          <li><a href="#k-aws">aws</a></li>
+          <li><a href="#k-obs">observability</a></li>
+          <li><a href="#k-sec">security</a></li>
+          <li><a href="#k-senior">senior &amp; hành vi</a></li>
+        </ul>
+
+        <article class="inc" id="k-answer">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K0</span><span class="tag">cách trả lời</span></p>
+            <h3>Khung trả lời một câu hỏi kỹ thuật</h3>
+            <p class="inc-tldr"><strong>Nhớ</strong>Ở mức mid–senior, người phỏng vấn chấm cách lập luận, đánh đổi và xử lý sự cố. Ít ai chấm việc thuộc lòng tên field.</p>
+          </header>
+          <ol>
+            <li><strong>Định nghĩa</strong> trong một câu.</li>
+            <li><strong>Vì sao</strong> nó tồn tại, giải quyết vấn đề gì.</li>
+            <li><strong>Làm thế nào</strong>: lệnh, field, cấu hình cụ thể.</li>
+            <li><strong>Đánh đổi</strong>: khi nào không nên dùng, bẫy hay gặp.</li>
+            <li><strong>Ví dụ thật</strong>: nối sang một sự cố ở trên.</li>
+          </ol>
+          <h4>Khi quên một chi tiết</h4>
+          <p>Nói ý tưởng và cách kiểm chứng, đừng bịa. Ví dụ: "Tôi không nhớ chính xác tên field, nó nằm dưới <code>spec.strategy</code>, tôi sẽ kiểm bằng <code>kubectl explain deployment.spec.strategy</code>." Với Terraform thì tra docs của provider hoặc <code>terraform providers schema -json</code>. Hiểu đúng bản chất quan trọng hơn nhớ đúng cú pháp.</p>
+          <h4>Khi bị hỏi "bạn có dùng AI không?"</h4>
+          <p>Trả lời thật: dùng AI cho boilerplate và tra cứu, nhưng tự review từng dòng, test ở dev và chịu trách nhiệm khi nó chạy production. Kèm một ví dụ cụ thể về lỗi đã bắt được trong code do AI sinh ra.</p>
+        </article>
+
+        <article class="inc" id="k-write">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K1</span><span class="tag">viết tay</span><span class="tag">live coding</span></p>
+            <h3>Năm mẫu phải tự viết được trong 5 phút</h3>
+            <p class="inc-tldr"><strong>Cách ôn</strong>Đọc tên mẫu, tự viết ra giấy hoặc một file trống, rồi mới mở ra so. Sai chỗ nào thì ôn đúng chỗ đó. Comment trong mẫu chính là những câu hay bị hỏi.</p>
+          </header>
+
+          <details class="drill">
+            <summary>Dockerfile multi-stage (Java)</summary>
+<pre class="k-code"><code><span class="c"># ---- stage 1: build, có đủ JDK + Maven ----</span>
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /src
+<span class="c"># copy pom trước: chỉ sửa code thì layer dependency vẫn lấy từ cache</span>
+COPY pom.xml .
+RUN mvn -B -q dependency:go-offline
+COPY src ./src
+RUN mvn -B -q package -DskipTests
+
+<span class="c"># ---- stage 2: runtime, chỉ có JRE: image nhỏ hơn, ít CVE hơn ----</span>
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+RUN useradd --system --uid 10001 app
+COPY --from=build /src/target/*.jar app.jar
+<span class="c"># không chạy bằng root</span>
+USER 10001
+EXPOSE 8080
+<span class="c"># exec form: java là PID 1 nên nhận được SIGTERM khi pod bị tắt</span>
+ENTRYPOINT ["java", "-jar", "app.jar"]</code></pre>
+            <p class="review">hay bị hỏi: comment trong Dockerfile phải nằm riêng một dòng, # ở cuối dòng bị coi là tham số · .dockerignore · docker build --target build · không đưa secret qua ARG/ENV, dùng RUN --mount=type=secret · HEALTHCHECK</p>
+          </details>
+
+          <details class="drill">
+            <summary>Jenkinsfile declarative</summary>
+<pre class="k-code"><code>pipeline {
+  agent { label 'docker' }                <span class="c">// chạy ở đâu; trên K8s: agent { kubernetes { ... } }</span>
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+  parameters {
+    booleanParam(name: 'DEPLOY_PROD', defaultValue: false, description: 'Deploy lên prod?')
+  }
+  environment {
+    IMAGE = '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/api'
+  }
+  stages {
+    stage('Test') {
+      steps {
+        sh './mvnw -B test'
+      }
+    }
+    stage('Build &amp; push') {
+      steps {
+        <span class="c">// nháy đơn: shell tự đọc biến môi trường, Groovy không nội suy</span>
+        sh '''
+          docker build -t "$IMAGE:$GIT_COMMIT" .
+          docker push "$IMAGE:$GIT_COMMIT"
+        '''
+      }
+    }
+    stage('Deploy prod') {
+      when {                              <span class="c">// nhiều điều kiện = AND</span>
+        branch 'main'
+        expression { params.DEPLOY_PROD }
+      }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          input message: 'Deploy lên prod?', ok: 'Deploy'
+        }
+        withCredentials([file(credentialsId: 'kubeconfig-prod', variable: 'KUBECONFIG')]) {
+          sh 'helm upgrade --install api ./chart -n prod --set image.tag="$GIT_COMMIT" --wait'
+        }
+      }
+    }
+  }
+  post {
+    always  { junit allowEmptyResults: true, testResults: '**/surefire-reports/*.xml' }
+    failure { echo "Build #${env.BUILD_NUMBER} lỗi" }
+  }
+}</code></pre>
+            <p class="review">hay bị hỏi: declarative vs scripted · agent none + agent riêng cho từng stage · parallel · stash/unstash giữa các agent · shared library @Library('ci-lib') _ · đăng nhập ECR bằng aws ecr get-login-password · input đặt trong stage đang giữ agent sẽ chiếm executor suốt lúc chờ · với GitOps, bước deploy là commit tag mới vào repo deploy để ArgoCD sync</p>
+          </details>
+
+          <details class="drill">
+            <summary>Terraform: backend, provider, variable, resource, module</summary>
+<pre class="k-code"><code>terraform {
+  required_version = "&gt;= 1.11"
+  required_providers {
+    aws = { source = "hashicorp/aws", version = "~&gt; 6.0" }   <span class="c"># ghim major version</span>
+  }
+  backend "s3" {
+    bucket       = "acme-tfstate"
+    key          = "prod/network.tfstate"
+    region       = "ap-northeast-1"
+    encrypt      = true
+    use_lockfile = true    <span class="c"># khoá state bằng file .tflock trên S3; bản cũ dùng dynamodb_table</span>
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+variable "region" {
+  type    = string
+  default = "ap-northeast-1"
+}
+
+variable "private_subnets" {
+  type = map(string)       <span class="c"># { "a" = "10.0.1.0/24", "c" = "10.0.2.0/24" }</span>
+}
+
+locals {
+  tags = { env = "prod", owner = "devops" }
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags       = merge(local.tags, { Name = "main" })
+}
+
+resource "aws_subnet" "private" {
+  for_each          = var.private_subnets   <span class="c"># key ổn định; count sẽ đánh lại index khi xoá phần tử ở giữa</span>
+  vpc_id            = aws_vpc.main.id       <span class="c"># tham chiếu: Terraform tự suy ra thứ tự tạo</span>
+  availability_zone = "${var.region}${each.key}"
+  cidr_block        = each.value
+  tags              = merge(local.tags, { Name = "private-${each.key}" })
+}
+
+module "db" {
+  source     = "./modules/rds"              <span class="c"># module từ registry thì thêm version = "~&gt; x.y"</span>
+  subnet_ids = [for s in aws_subnet.private : s.id]
+}
+
+resource "aws_s3_bucket" "backups" {
+  bucket = "acme-prod-backups"
+  lifecycle {
+    prevent_destroy = true                  <span class="c"># plan báo lỗi nếu có thay đổi đòi xoá bucket này</span>
+  }
+}
+
+output "vpc_id" {
+  value = aws_vpc.main.id
+}</code></pre>
+            <p class="review">hay bị hỏi: init → plan -out → apply planfile · fmt, validate, tflint · count vs for_each · import / moved / removed block · workspace hay thư mục riêng cho mỗi env · sensitive = true vẫn nằm trong state · data source vs resource</p>
+          </details>
+
+          <details class="drill">
+            <summary>Kubernetes: Deployment + Service</summary>
+<pre class="k-code"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: api }              <span class="c"># phải khớp labels của template</span>
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  template:
+    metadata:
+      labels: { app: api }
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: api
+          image: registry.example.com/api:3f2a9c1   <span class="c"># tag theo commit, không dùng latest</span>
+          ports:
+            - containerPort: 8080
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }  <span class="c"># scheduler xếp pod theo request</span>
+            limits: { memory: 512Mi }               <span class="c"># vượt là OOMKilled; CPU limit gây throttle nên nhiều team bỏ</span>
+          startupProbe:                             <span class="c"># tạm tắt liveness tới khi app khởi động xong</span>
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:                           <span class="c"># fail: rút khỏi Service, không restart</span>
+            httpGet: { path: /ready, port: 8080 }
+            periodSeconds: 5
+          livenessProbe:                            <span class="c"># fail: kubelet restart container</span>
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 10
+          lifecycle:
+            preStop:                                <span class="c"># chờ endpoint được gỡ rồi mới nhận SIGTERM</span>
+              exec: { command: ["sleep", "5"] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  type: ClusterIP
+  selector: { app: api }
+  ports:
+    - port: 80
+      targetPort: 8080</code></pre>
+            <p class="review">mẹo khi phải viết tại chỗ: kubectl create deployment api --image=nginx --dry-run=client -o yaml sinh sẵn khung · kubectl explain để tra field · hay bị hỏi: QoS · PDB · HPA · Ingress · ConfigMap qua env hay mount</p>
+          </details>
+
+          <details class="drill">
+            <summary>Bash script an toàn</summary>
+<pre class="k-code"><code>#!/usr/bin/env bash
+set -euo pipefail                 <span class="c"># dừng khi có lỗi, khi dùng biến chưa gán, khi lỗi giữa pipe</span>
+trap 'echo "lỗi ở dòng $LINENO" &gt;&amp;2' ERR
+
+<span class="c"># kiểm health từng host truyền vào: ./check.sh api.example.com web.example.com</span>
+for host in "$@"; do
+  if ! curl -fsS --max-time 5 "https://$host/health" &gt; /dev/null; then
+    echo "DOWN: $host" &gt;&amp;2
+    exit 1
+  fi
+  echo "OK: $host"
+done</code></pre>
+            <p class="review">hay bị hỏi: luôn quote "$var" · $? và exit code · [[ ]] vs [ ] · $(...) · đừng bật set -x quanh lệnh có secret vì nó in nguyên giá trị ra log</p>
+          </details>
+        </article>
+
+        <article class="inc" id="k-linux">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K2</span><span class="tag">linux</span><span class="tag">networking</span></p>
+            <h3>Linux &amp; mạng</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>tiến trình &amp; signal</li><li>load average</li><li>bộ nhớ &amp; page cache</li><li>oom killer</li><li>ổ đĩa &amp; inode</li><li>file descriptor</li><li>systemd &amp; journald</li><li>dns</li><li>tcp &amp; tls</li><li>http</li><li>l4 vs l7</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Gõ một URL vào trình duyệt thì chuyện gì xảy ra?</summary>
+              <p class="k-a">DNS: cache của trình duyệt, rồi của OS, rồi resolver đệ quy hỏi lần lượt root, TLD, authoritative. Sau đó mở kết nối TCP (SYN, SYN-ACK, ACK) và bắt tay TLS: client gửi SNI, server gửi certificate, client kiểm chain và hostname, hai bên thống nhất khoá. Rồi gửi HTTP request; phía server đi qua CDN hoặc load balancer, reverse proxy, app, database, và response quay ngược lại. Ở vị trí DevOps nên kể thêm chỗ hay hỏng: TTL của DNS, cert hết hạn, timeout của load balancer.</p></details>
+            <details class="k-q"><summary>Load average rất cao nhưng CPU gần như rảnh, vì sao?</summary>
+              <p class="k-a">Trên Linux, load average đếm cả tác vụ đang chạy, đang chờ CPU và đang ở D state (ngủ không ngắt được, thường do chờ I/O hoặc lock của kernel). Xem <code>vmstat 1</code> (cột <code>b</code>, <code>wa</code>), <code>iostat -x 1</code>, <code>ps -eo stat,cmd | grep '^D'</code> và <code>dmesg -T</code>. Xem <a href="#inc-08">#08</a>.</p></details>
+            <details class="k-q"><summary><code>df</code> báo đầy nhưng <code>du</code> không thấy file lớn nào?</summary>
+              <p class="k-a">File đã bị xoá nhưng tiến trình vẫn giữ mở (thường là file log). Tìm bằng <code>lsof +L1</code>, rồi restart tiến trình hoặc truncate qua <code>: &gt; /proc/&lt;pid&gt;/fd/&lt;n&gt;</code>. Cũng kiểm xem có hết inode không: <code>df -i</code>.</p></details>
+            <details class="k-q"><summary>SIGTERM khác SIGKILL thế nào? Exit code 137 và 143 nghĩa là gì?</summary>
+              <p class="k-a">SIGTERM (15) là yêu cầu tắt, ứng dụng bắt được để dọn dẹp. SIGKILL (9) là kernel giết ngay, không bắt được. Exit code = 128 + số signal: 143 là bị SIGTERM, 137 là bị SIGKILL, thường do OOMKilled hoặc hết grace period. Xem <a href="#inc-02">#02</a>.</p></details>
+            <details class="k-q"><summary>Bộ nhớ "free" còn rất ít, có đáng lo không?</summary>
+              <p class="k-a">Chưa chắc. Linux dùng RAM trống làm page cache. Nhìn cột <code>available</code> của <code>free -m</code>, swap in/out (<code>vmstat</code> cột <code>si</code>, <code>so</code>) và PSI ở <code>/proc/pressure/memory</code>. Thrashing có thể làm treo máy hàng giờ mà không có OOM kill nào. Xem <a href="#inc-12">#12</a>.</p></details>
+            <details class="k-q"><summary>TIME_WAIT và CLOSE_WAIT nhiều thì có vấn đề gì?</summary>
+              <p class="k-a">TIME_WAIT nằm ở phía chủ động đóng kết nối, giữ 2×MSL để gói tin đến muộn không lẫn vào kết nối mới; nhiều kết nối ngắn thì có nhiều TIME_WAIT là bình thường. CLOSE_WAIT nhiều nghĩa là ứng dụng đã nhận FIN nhưng không gọi <code>close()</code>: đó là bug rò socket. Xem bằng <code>ss -tan state close-wait</code>.</p></details>
+            <details class="k-q"><summary>Load balancer L4 khác L7 thế nào?</summary>
+              <p class="k-a">L4 (NLB) chuyển TCP/UDP theo IP và cổng, không đọc nội dung, nhanh và giữ được IP nguồn. L7 (ALB, NGINX) hiểu HTTP: định tuyến theo host, path, header, kết thúc TLS, gắn được WAF. Xem <a href="#inc-06">#06</a>, <a href="#inc-07">#07</a>.</p></details>
+            <details class="k-q"><summary>Bộ lệnh troubleshoot bạn hay dùng?</summary>
+              <p class="k-a"><code>top</code>/<code>htop</code>, <code>vmstat 1</code>, <code>iostat -x 1</code>, <code>free -m</code>, <code>df -h</code>/<code>df -i</code>, <code>ss -tanp</code>, <code>dig +trace</code>, <code>curl -v</code>, <code>tcpdump -i any port 443</code>, <code>journalctl -u &lt;svc&gt; -f</code>, <code>dmesg -T</code>, <code>strace -p &lt;pid&gt;</code>. Nói kèm thứ tự: tài nguyên, rồi mạng, rồi log ứng dụng.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-container">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K3</span><span class="tag">docker</span><span class="tag">containers</span></p>
+            <h3>Container</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>namespaces</li><li>cgroups</li><li>layer &amp; cache</li><li>multi-stage</li><li>cmd vs entrypoint</li><li>pid 1 &amp; signal</li><li>exit code</li><li>volume</li><li>network bridge</li><li>registry &amp; tag</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Container khác VM thế nào?</summary>
+              <p class="k-a">Container dùng chung kernel với host, được cô lập bằng namespaces (pid, net, mnt, uts, ipc, user) và bị giới hạn tài nguyên bằng cgroups. VM có kernel riêng, chạy trên hypervisor. Container nhẹ, khởi động nhanh, nhưng mức cô lập yếu hơn VM.</p></details>
+            <details class="k-q"><summary><code>CMD</code> khác <code>ENTRYPOINT</code> thế nào?</summary>
+              <p class="k-a"><code>ENTRYPOINT</code> là lệnh chính; <code>CMD</code> là tham số mặc định cho nó (hoặc là lệnh mặc định nếu không có <code>ENTRYPOINT</code>) và bị ghi đè bởi tham số của <code>docker run</code>. Nên dùng exec form <code>["..."]</code>: shell form chạy qua <code>/bin/sh -c</code>, ứng dụng không phải PID 1 và không nhận được SIGTERM. Xem <a href="#inc-02">#02</a>.</p></details>
+            <details class="k-q"><summary>Làm sao để image nhỏ và build nhanh?</summary>
+              <p class="k-a">Multi-stage, base image nhỏ (slim, distroless; alpine dùng musl nên cẩn thận), có <code>.dockerignore</code>, copy file khai báo dependency trước code để tận dụng cache, gộp lệnh <code>RUN</code> và xoá cache của package manager ngay trong cùng layer.</p></details>
+            <details class="k-q"><summary><code>COPY</code> vs <code>ADD</code>, <code>ARG</code> vs <code>ENV</code>?</summary>
+              <p class="k-a"><code>COPY</code> chỉ chép file; <code>ADD</code> còn tự giải nén tar và tải được URL, nên mặc định dùng <code>COPY</code>. <code>ARG</code> chỉ tồn tại lúc build, <code>ENV</code> còn lại cả lúc chạy. Không truyền secret qua <code>ARG</code> hay <code>ENV</code> vì nó nằm lại trong history hoặc config của image; dùng BuildKit <code>RUN --mount=type=secret</code>.</p></details>
+            <details class="k-q"><summary>Container báo "Up" có nghĩa là đang khoẻ không?</summary>
+              <p class="k-a">Không. Restart policy có thể che mất crash loop. Theo dõi số lần restart, dùng <code>HEALTHCHECK</code> hoặc probe kiểm đúng thứ người dùng cần. Xem <a href="#inc-04">#04</a>.</p></details>
+            <details class="k-q"><summary>Build image bên trong Kubernetes khi không có Docker daemon?</summary>
+              <p class="k-a">Dùng kaniko, BuildKit rootless hoặc buildah. Không mount <code>docker.sock</code> vào pod, vì làm vậy gần như trao quyền root trên node.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-k8s">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K4</span><span class="tag">kubernetes</span><span class="tag">eks</span></p>
+            <h3>Kubernetes</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>api-server</li><li>etcd</li><li>scheduler</li><li>controller</li><li>kubelet</li><li>deployment</li><li>statefulset</li><li>daemonset</li><li>job / cronjob</li><li>service</li><li>ingress</li><li>configmap / secret</li><li>probe</li><li>request / limit / qos</li><li>hpa</li><li>pdb</li><li>taint / affinity</li><li>pv / pvc / storageclass</li><li>rbac</li><li>irsa</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary><code>kubectl apply</code> một Deployment thì chuyện gì xảy ra?</summary>
+              <p class="k-a">kubectl gửi tới API server, qua xác thực, RBAC và admission, rồi được lưu vào etcd. Deployment controller tạo ReplicaSet, ReplicaSet tạo Pod. Scheduler chọn node dựa trên request, taint và affinity. kubelet trên node đó gọi container runtime (containerd) kéo image, chạy container và báo trạng thái về API server.</p></details>
+            <details class="k-q"><summary>Liveness, readiness và startup probe khác nhau thế nào?</summary>
+              <p class="k-a">Readiness fail: pod bị rút khỏi endpoint của Service, không bị restart. Liveness fail: kubelet restart container. Startup probe tạm tắt hai probe kia cho tới khi app khởi động xong. Đừng để liveness phụ thuộc database, nếu không thì database chậm một chút là cả loạt pod bị restart.</p></details>
+            <details class="k-q"><summary>Requests và limits khác nhau thế nào? QoS class là gì?</summary>
+              <p class="k-a">Request là mức đảm bảo, scheduler dựa vào nó để xếp pod. Limit là trần: vượt CPU limit thì bị throttle, vượt memory limit thì bị OOMKilled. QoS: Guaranteed (mọi container có request bằng limit cho cả CPU và memory), Burstable, BestEffort (không đặt gì, bị đuổi trước khi node thiếu tài nguyên). Xem <a href="#inc-02">#02</a>.</p></details>
+            <details class="k-q"><summary>Pod bị CrashLoopBackOff, debug thế nào?</summary>
+              <p class="k-a"><code>kubectl describe pod</code> xem event, <code>Last State</code> và exit code; <code>kubectl logs --previous</code> xem log của lần chạy trước. Kiểm env, ConfigMap, Secret, probe có quá gắt không, có bị OOMKilled không. Image không có shell thì dùng <code>kubectl debug</code> với ephemeral container.</p></details>
+            <details class="k-q"><summary>Pod nằm Pending mãi?</summary>
+              <p class="k-a"><code>describe</code> xem event của scheduler: không node nào đủ CPU hoặc memory theo request, taint chưa được tolerate, nodeSelector hoặc affinity không khớp, PVC chưa bind (EBS gắn theo AZ), hoặc autoscaler không tạo được node mới. Xem <a href="#inc-11">#11</a>.</p></details>
+            <details class="k-q"><summary>Deployment, StatefulSet và DaemonSet khác nhau thế nào?</summary>
+              <p class="k-a">Deployment: các pod giống nhau, thay thế cho nhau được. StatefulSet: tên cố định (<code>db-0</code>, <code>db-1</code>), mỗi pod một PVC riêng, khởi động theo thứ tự, đi kèm headless Service; dùng cho database, broker. DaemonSet: mỗi node một pod; dùng cho log agent, CNI, node exporter.</p></details>
+            <details class="k-q"><summary>Các loại Service? Ingress dùng để làm gì?</summary>
+              <p class="k-a">ClusterIP (chỉ trong cluster), NodePort (mở một cổng trên mọi node), LoadBalancer (tạo load balancer của cloud), ExternalName (CNAME), headless (<code>clusterIP: None</code>, DNS trả về IP từng pod). Trên AWS, scheme mặc định của LoadBalancer tuỳ controller: bản in-tree mặc định ra internet, AWS Load Balancer Controller mặc định internal, nên luôn ghi rõ scheme bằng annotation. Ingress là luật L7 theo host và path, cần một ingress controller (NGINX, AWS Load Balancer Controller). Xem <a href="#inc-05">#05</a>.</p></details>
+            <details class="k-q"><summary>Rolling update và rollback hoạt động thế nào?</summary>
+              <p class="k-a"><code>maxSurge</code> và <code>maxUnavailable</code> quyết định tốc độ và mức sẵn sàng; pod mới phải Ready thì mới thay tiếp. Rollback bằng <code>kubectl rollout undo deployment/api</code>; với GitOps thì revert commit.</p></details>
+            <details class="k-q"><summary>Làm sao để pod tắt êm khi deploy?</summary>
+              <p class="k-a">Khi xoá pod, việc gỡ pod khỏi endpoint và việc chạy preStop rồi gửi SIGTERM diễn ra gần như song song. Thêm preStop sleep vài giây để load balancer kịp gỡ pod, ứng dụng bắt SIGTERM để drain request, và <code>terminationGracePeriodSeconds</code> đủ dài; hết thời gian đó là SIGKILL.</p></details>
+            <details class="k-q"><summary>PodDisruptionBudget chặn được gì, không chặn được gì?</summary>
+              <p class="k-a">PDB chỉ chặn disruption tự nguyện: drain, consolidation, upgrade node. Nó không chặn được node chết hay spot bị thu hồi. PDB kiểu <code>maxUnavailable: 0</code> sẽ chặn drain vô thời hạn, hay gặp khi upgrade cluster. Xem <a href="#inc-01">#01</a>.</p></details>
+            <details class="k-q"><summary>HPA tính số replica thế nào?</summary>
+              <p class="k-a">replica mong muốn = ceil(replica hiện tại × metric hiện tại / metric mục tiêu). % CPU được tính trên request, nên pod không đặt request thì HPA theo CPU không chạy. Metric lấy từ metrics-server, hoặc custom/external metric (Prometheus Adapter, KEDA). HPA thêm pod; Cluster Autoscaler hoặc Karpenter mới thêm node.</p></details>
+            <details class="k-q"><summary>ConfigMap đưa vào qua env hay qua volume, khác gì nhau?</summary>
+              <p class="k-a">Qua env: giá trị chỉ được đọc lúc container khởi động, đổi ConfigMap xong phải restart pod. Qua volume: file được cập nhật sau một khoảng trễ (trừ khi dùng <code>subPath</code>), nhưng ứng dụng phải tự đọc lại. Nhiều team thêm hash của config vào annotation của pod template để đổi config là rollout.</p></details>
+            <details class="k-q"><summary>Secret của Kubernetes có an toàn không?</summary>
+              <p class="k-a">Mặc định chỉ là base64, không phải mã hoá. Bật encryption at rest bằng KMS, giới hạn RBAC đọc secret, và lấy secret từ nguồn ngoài: External Secrets Operator với Secrets Manager hoặc Vault, hay Sealed Secrets nếu muốn lưu trong Git.</p></details>
+            <details class="k-q"><summary>PV, PVC và StorageClass?</summary>
+              <p class="k-a">PVC là yêu cầu dung lượng của pod; StorageClass cấp PV động qua CSI driver (EBS CSI). EBS là ReadWriteOnce và gắn theo AZ, nên dùng <code>volumeBindingMode: WaitForFirstConsumer</code> để ổ được tạo đúng AZ của pod. Xem <a href="#inc-01">#01</a>.</p></details>
+            <details class="k-q"><summary>Pod gọi AWS API thế nào cho đúng?</summary>
+              <p class="k-a">Dùng IRSA (ServiceAccount gắn IAM role qua OIDC) hoặc EKS Pod Identity. Không dùng access key tĩnh, không dựa vào IAM role của node, và chặn pod đọc IMDS (bắt buộc IMDSv2, hop limit 1).</p></details>
+            <details class="k-q"><summary>RBAC trong Kubernetes?</summary>
+              <p class="k-a">Role hoặc ClusterRole định nghĩa quyền (verb trên resource); RoleBinding hoặc ClusterRoleBinding gán quyền đó cho user, group hoặc ServiceAccount. Kiểm bằng <code>kubectl auth can-i list secrets --as system:serviceaccount:ns:sa</code>.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-cicd">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K5</span><span class="tag">jenkins</span><span class="tag">argocd</span><span class="tag">ci/cd</span></p>
+            <h3>CI/CD &amp; GitOps</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>ci vs cd</li><li>pipeline as code</li><li>agent</li><li>credentials</li><li>shared library</li><li>webhook</li><li>artifact &amp; tag</li><li>build once, deploy many</li><li>rolling / blue-green / canary</li><li>gitops</li><li>rollback</li><li>db migration</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Continuous Delivery khác Continuous Deployment thế nào?</summary>
+              <p class="k-a">Delivery: mọi commit đều ở trạng thái sẵn sàng release, bước lên production vẫn cần bấm hoặc duyệt. Deployment: qua hết kiểm tra là tự động lên production.</p></details>
+            <details class="k-q"><summary>Declarative pipeline khác scripted pipeline?</summary>
+              <p class="k-a">Declarative có cấu trúc cố định (<code>pipeline</code>, <code>agent</code>, <code>stages</code>, <code>post</code>), dễ đọc, được validate sớm, có sẵn <code>when</code> và <code>options</code>. Scripted là Groovy tự do trong <code>node {}</code>, linh hoạt hơn nhưng khó bảo trì. Cần logic thì nhúng <code>script {}</code> vào declarative.</p></details>
+            <details class="k-q"><summary>Làm sao dùng chung pipeline cho hơn 20 service?</summary>
+              <p class="k-a">Đưa các bước dùng chung vào shared library (<code>@Library('ci-lib') _</code>, hàm nằm trong <code>vars/</code>), mỗi repo chỉ giữ một Jenkinsfile ngắn gọi hàm. Kết hợp multibranch hoặc organization folder và webhook từ GitLab hay GitHub.</p></details>
+            <details class="k-q"><summary>Quản lý secret trong pipeline thế nào?</summary>
+              <p class="k-a">Lưu trong Jenkins Credentials hoặc Vault, lấy ra bằng <code>withCredentials</code> để Jenkins che giá trị trong log. Dùng nháy đơn <code>sh '... $TOKEN'</code> cho shell tự đọc biến; nháy kép khiến Groovy nội suy secret thẳng vào chuỗi lệnh. Không bật <code>set -x</code> quanh lệnh có secret. Nếu phát hiện secret bị lộ trong log thì xoay vòng ngay.</p></details>
+            <details class="k-q"><summary>Gắn tag image thế nào?</summary>
+              <p class="k-a">Theo git SHA, thêm semver khi release; không deploy <code>latest</code>. Build một lần rồi promote đúng image đó qua dev, staging, production; các môi trường chỉ khác nhau ở config.</p></details>
+            <details class="k-q"><summary>Rolling, blue/green và canary khác nhau thế nào?</summary>
+              <p class="k-a">Rolling: thay dần từng pod, rẻ, có lúc hai phiên bản chạy song song. Blue/green: dựng đủ môi trường mới rồi chuyển traffic, rollback tức thì nhưng tốn gấp đôi tài nguyên trong lúc chuyển. Canary: đưa một phần nhỏ traffic vào bản mới, đo metric rồi tăng dần (Argo Rollouts, Flagger).</p></details>
+            <details class="k-q"><summary>Deploy có thay đổi database mà không downtime?</summary>
+              <p class="k-a">Theo kiểu expand/contract: thêm cột hoặc bảng mới tương thích ngược, deploy code dùng được cả cũ lẫn mới, backfill dữ liệu, tới release sau mới xoá phần cũ. Migration chạy thành một bước riêng (Job hoặc hook PreSync), không để mỗi pod tự chạy migration cùng lúc.</p></details>
+            <details class="k-q"><summary>GitOps là gì? ArgoCD làm gì?</summary>
+              <p class="k-a">Trạng thái mong muốn nằm trong Git. ArgoCD chạy trong cluster, kéo manifest về, so với trạng thái thật, sync và tự sửa drift (self-heal). Lợi ích: lịch sử thay đổi nằm trong Git, rollback là revert commit, CI không cần credential vào cluster. Lưu ý sync wave và hook cho migration.</p></details>
+            <details class="k-q"><summary>Pipeline chạy chậm, tăng tốc thế nào?</summary>
+              <p class="k-a">Cache dependency và layer của image, chạy song song bằng <code>parallel</code>, chỉ build service có thay đổi, cho agent đủ tài nguyên, tách test nhanh và test chậm.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-terraform">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K6</span><span class="tag">terraform</span><span class="tag">iac</span></p>
+            <h3>Terraform</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>state</li><li>backend &amp; lock</li><li>plan / apply</li><li>provider version</li><li>resource vs data</li><li>variable / output / locals</li><li>module</li><li>count vs for_each</li><li>lifecycle</li><li>import / moved / removed</li><li>workspace</li><li>drift</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>State là gì, vì sao phải để remote?</summary>
+              <p class="k-a">State ánh xạ resource trong code với ID thật trên cloud và lưu thuộc tính để tính ra thay đổi. Để remote (S3) để cả team dùng chung, bật versioning để khôi phục được, và khoá để hai người không apply cùng lúc. State có thể chứa secret nên phải mã hoá và hạn chế quyền đọc.</p></details>
+            <details class="k-q"><summary>Khoá state hoạt động thế nào? Bị kẹt lock thì làm gì?</summary>
+              <p class="k-a">Backend S3 với <code>use_lockfile = true</code> tạo file <code>.tflock</code> cạnh state (Terraform 1.11 trở lên); bản cũ dùng bảng DynamoDB. Lock bị kẹt do apply bị ngắt giữa chừng: xác nhận không ai đang chạy rồi mới <code>terraform force-unlock &lt;LOCK_ID&gt;</code>.</p></details>
+            <details class="k-q"><summary><code>count</code> khác <code>for_each</code> thế nào?</summary>
+              <p class="k-a"><code>count</code> định danh theo index: xoá một phần tử ở giữa list thì các resource phía sau bị đánh index lại, nghĩa là bị xoá rồi tạo lại. <code>for_each</code> định danh theo key ổn định (map hoặc set), thêm bớt một phần tử chỉ ảnh hưởng đúng phần tử đó.</p></details>
+            <details class="k-q"><summary>Ai đó sửa tay trên console (drift), xử lý thế nào?</summary>
+              <p class="k-a"><code>terraform plan</code> sẽ cho thấy khác biệt. Quyết định một trong hai: đưa thay đổi đó vào code, hoặc apply để trả hạ tầng về đúng như code. Ngăn tái diễn bằng cách giới hạn quyền sửa tay và chạy plan định kỳ để phát hiện drift.</p></details>
+            <details class="k-q"><summary>Đưa một resource đang có sẵn vào Terraform?</summary>
+              <p class="k-a">Dùng <code>import</code> block (Terraform 1.5 trở lên) hoặc lệnh <code>terraform import</code>, rồi viết code cho tới khi plan không còn thay đổi. <code>terraform plan -generate-config-out=generated.tf</code> sinh được code nháp.</p></details>
+            <details class="k-q"><summary>Đổi tên resource hoặc chuyển vào module mà không bị xoá?</summary>
+              <p class="k-a">Dùng <code>moved</code> block (1.1 trở lên) hoặc <code>terraform state mv</code>. Muốn bỏ quản lý mà không xoá resource thật: <code>removed</code> block (1.7 trở lên) hoặc <code>terraform state rm</code>. Muốn tạo lại một resource: <code>terraform apply -replace=ADDRESS</code> (thay cho <code>taint</code> cũ).</p></details>
+            <details class="k-q"><summary>Khi nào dùng <code>lifecycle</code>?</summary>
+              <p class="k-a"><code>prevent_destroy</code> cho database, bucket quan trọng. <code>create_before_destroy</code> cho resource cần thay mà không được gián đoạn (launch template, certificate). <code>ignore_changes</code> cho thuộc tính bị hệ thống khác sửa, ví dụ <code>desired_count</code> do autoscaling chỉnh. <code>replace_triggered_by</code> để ép thay khi một thứ khác đổi.</p></details>
+            <details class="k-q"><summary>Tổ chức code cho nhiều môi trường?</summary>
+              <p class="k-a">Mỗi môi trường một thư mục với state và backend riêng, cùng gọi các module có ghim version; workspace chỉ hợp khi các môi trường gần như giống hệt nhau. Tách state theo lớp (network, cluster, ứng dụng) để giảm phạm vi ảnh hưởng và plan nhanh hơn.</p></details>
+            <details class="k-q"><summary>Quy trình CI/CD cho Terraform?</summary>
+              <p class="k-a">Trên merge request: <code>fmt -check</code>, <code>validate</code>, tflint hoặc checkov, <code>plan</code> và đăng kết quả plan lên MR. Sau khi merge: apply đúng file plan đã được duyệt (<code>plan -out=tfplan</code> rồi <code>apply tfplan</code>), production cần người duyệt. CI lấy quyền qua IAM role bằng OIDC, không dùng key tĩnh.</p></details>
+            <details class="k-q"><summary>Xử lý secret trong Terraform thế nào?</summary>
+              <p class="k-a">Không commit tfvars chứa secret. Đọc từ Secrets Manager hoặc SSM qua data source, hoặc truyền bằng biến môi trường <code>TF_VAR_...</code>. <code>sensitive = true</code> chỉ ẩn giá trị khỏi output, giá trị vẫn nằm trong state, nên state phải được mã hoá và hạn chế quyền.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-aws">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K7</span><span class="tag">aws</span></p>
+            <h3>AWS</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>vpc</li><li>subnet &amp; route table</li><li>igw / nat</li><li>sg vs nacl</li><li>iam role / policy</li><li>sts</li><li>scp</li><li>ec2 / asg</li><li>alb / nlb</li><li>rds</li><li>s3</li><li>cloudfront</li><li>eks</li><li>cloudwatch</li><li>cloudtrail</li><li>cost</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Public subnet khác private subnet thế nào?</summary>
+              <p class="k-a">Public subnet có route <code>0.0.0.0/0</code> tới Internet Gateway. Private subnet đi ra internet qua NAT Gateway (đặt ở public subnet) và không nhận kết nối từ ngoài vào. Nên có mỗi AZ một NAT Gateway để một AZ hỏng không kéo AZ khác theo.</p></details>
+            <details class="k-q"><summary>Security Group khác NACL thế nào?</summary>
+              <p class="k-a">Security Group gắn vào ENI, stateful (đã cho chiều vào thì chiều trả lời tự được phép), chỉ có rule allow. NACL gắn vào subnet, stateless (phải mở cả chiều về, kể cả ephemeral port), có cả allow lẫn deny, xét rule theo thứ tự số.</p></details>
+            <details class="k-q"><summary>IAM quyết định cho phép hay từ chối thế nào?</summary>
+              <p class="k-a">Mặc định là từ chối. Một explicit deny ở bất kỳ policy nào thắng tất cả. Phải có allow trong identity policy hoặc resource policy, và không bị SCP, permission boundary hay session policy chặn. Xem <a href="#inc-11">#11</a>.</p></details>
+            <details class="k-q"><summary>IAM role khác IAM user thế nào?</summary>
+              <p class="k-a">User có credential dài hạn. Role được assume để lấy credential tạm thời qua STS. Ưu tiên role cho EC2 (instance profile), pod (IRSA), CI (OIDC) và truy cập chéo account.</p></details>
+            <details class="k-q"><summary>Chọn ALB hay NLB?</summary>
+              <p class="k-a">ALB là L7: định tuyến theo path và host, hỗ trợ WebSocket, gắn được WAF, cross-zone mặc định bật, idle timeout mặc định 60 giây. NLB là L4: TCP, UDP, TLS, có IP tĩnh, hiệu năng cao, giữ IP nguồn, cross-zone mặc định tắt. Xem <a href="#inc-06">#06</a>, <a href="#inc-07">#07</a>.</p></details>
+            <details class="k-q"><summary>RDS Multi-AZ khác read replica thế nào?</summary>
+              <p class="k-a">Multi-AZ (dạng instance): bản standby đồng bộ ở AZ khác để failover tự động, endpoint giữ nguyên, standby không phục vụ đọc. Read replica: sao chép bất đồng bộ để chia tải đọc, có thể promote thành primary khi cần DR. Một cái để sẵn sàng, một cái để mở rộng.</p></details>
+            <details class="k-q"><summary>Backup và DR cho database trên AWS?</summary>
+              <p class="k-a">Automated backup kèm point-in-time recovery theo retention, snapshot thủ công, copy snapshot sang region khác. Đặt RPO và RTO rõ ràng và diễn tập restore định kỳ. Nâng version thì cân nhắc Blue/Green deployment; sau khi chuyển, ứng dụng phải kết nối lại. Xem <a href="#inc-05">#05</a>.</p></details>
+            <details class="k-q"><summary>Bảo vệ S3 thế nào?</summary>
+              <p class="k-a">Bật Block Public Access ở mức account, bucket policy tối thiểu, mã hoá SSE-KMS, versioning kèm lifecycle, Object Lock nếu cần chống xoá. Nội dung public thì phục vụ qua CloudFront với OAC thay vì mở bucket.</p></details>
+            <details class="k-q"><summary>Giảm chi phí AWS thế nào?</summary>
+              <p class="k-a">Right-size theo số đo thật, Savings Plans cho tải nền, Spot cho tải chịu được gián đoạn, tắt môi trường dev ngoài giờ, đổi gp2 sang gp3, lifecycle cho S3, để ý phí data transfer (NAT, traffic giữa các AZ), dọn EBS, snapshot, Elastic IP mồ côi. Xem <a href="#inc-01">#01</a>, <a href="#inc-04">#04</a>.</p></details>
+            <details class="k-q"><summary>Không truy cập được một instance hoặc ứng dụng, kiểm theo thứ tự nào?</summary>
+              <p class="k-a">Đi từng lớp: DNS, Security Group và NACL, route table, status check của instance, ứng dụng có listen đúng cổng và đúng interface không. Dùng SSM Session Manager thay cho SSH, và Reachability Analyzer để kiểm đường mạng.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-obs">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K8</span><span class="tag">observability</span><span class="tag">sre</span></p>
+            <h3>Observability &amp; SRE</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>metrics / logs / traces</li><li>prometheus</li><li>promql</li><li>alertmanager</li><li>golden signals</li><li>red / use</li><li>sli / slo / sla</li><li>error budget</li><li>thiết kế alert</li><li>postmortem</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Metrics, logs và traces khác nhau thế nào?</summary>
+              <p class="k-a">Metrics là các con số theo thời gian, rẻ, dùng để alert và xem xu hướng. Logs là sự kiện chi tiết, dùng để điều tra. Traces cho thấy một request đi qua những service nào và tốn bao lâu ở từng chặng. Nối ba thứ lại bằng trace ID hoặc request ID trong log.</p></details>
+            <details class="k-q"><summary>Prometheus hoạt động thế nào?</summary>
+              <p class="k-a">Theo mô hình pull: định kỳ scrape <code>/metrics</code> của các target (tìm qua service discovery), lưu time series cục bộ, đánh giá rule và gửi alert sang Alertmanager để gom nhóm, tắt tạm và định tuyến. Lưu lâu dài hoặc HA thì dùng Thanos, Mimir. Label có cardinality cao (như user_id) là thứ làm Prometheus phình to.</p></details>
+            <details class="k-q"><summary>Viết PromQL cho tốc độ request và latency p95?</summary>
+              <p class="k-a">Counter chỉ tăng, nên dùng <code>rate(http_requests_total[5m])</code> để ra số request mỗi giây. p95: <code>histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))</code>.</p></details>
+            <details class="k-q"><summary>Four golden signals, RED và USE là gì?</summary>
+              <p class="k-a">Golden signals: latency, traffic, errors, saturation. RED (rate, errors, duration) dùng cho service. USE (utilization, saturation, errors) dùng cho tài nguyên như CPU, ổ đĩa, mạng.</p></details>
+            <details class="k-q"><summary>SLI, SLO, SLA và error budget?</summary>
+              <p class="k-a">SLI là thước đo, ví dụ tỉ lệ request thành công dưới 300 ms. SLO là mục tiêu nội bộ, ví dụ 99,9% trong 30 ngày. SLA là cam kết với khách hàng, có điều khoản phạt. Error budget = 100% − SLO, với 99,9% là khoảng 43 phút mỗi 30 ngày; hết budget thì ưu tiên độ ổn định hơn tính năng mới.</p></details>
+            <details class="k-q"><summary>Thế nào là một alert tốt?</summary>
+              <p class="k-a">Alert theo triệu chứng người dùng thấy (tỉ lệ lỗi, latency, tốc độ đốt SLO) và phải hành động được; có <code>for:</code> để tránh nhấp nháy và kèm runbook. Cảnh báo về nguyên nhân (ổ đĩa sắp đầy) chỉ nên ở mức ticket. Alert không ai nhìn thì không phải monitoring. Xem <a href="#inc-03">#03</a>, <a href="#inc-12">#12</a>.</p></details>
+            <details class="k-q"><summary>Một postmortem tốt gồm những gì?</summary>
+              <p class="k-a">Không đổ lỗi cá nhân. Có timeline, ảnh hưởng tính bằng số liệu, nguyên nhân gốc và các yếu tố góp phần, cái gì chạy tốt và cái gì không, và action item có người chịu trách nhiệm kèm hạn chót. Xem <a href="#approach">cách tôi xử lý một sự cố</a>.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-sec">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K9</span><span class="tag">security</span></p>
+            <h3>Security</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>least privilege</li><li>quản lý secret</li><li>quét image</li><li>supply chain</li><li>pod security</li><li>network policy</li><li>tls &amp; certificate</li><li>audit log</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Quản lý secret thế nào cho đúng?</summary>
+              <p class="k-a">Không để secret trong Git, trong image hay trong biến lúc build. Nguồn gốc nằm ở Secrets Manager hoặc Vault, đưa vào lúc chạy qua External Secrets, CSI driver hoặc IAM role; xoay vòng định kỳ và audit ai đã đọc. Lỡ bị lộ thì xoay vòng ngay trước, dọn lịch sử sau.</p></details>
+            <details class="k-q"><summary>Bảo mật container và pod thế nào?</summary>
+              <p class="k-a">Base image tối thiểu, quét bằng Trivy hoặc Grype trong CI và chặn CVE nghiêm trọng, chạy non-root, <code>readOnlyRootFilesystem</code>, bỏ bớt capabilities, không chạy privileged, bật Pod Security Admission mức restricted, và NetworkPolicy chặn mặc định.</p></details>
+            <details class="k-q"><summary>Bảo vệ supply chain của phần mềm?</summary>
+              <p class="k-a">Ghim version hoặc digest, ký image bằng cosign và chỉ cho phép chạy image đã ký (admission policy như Kyverno), tạo SBOM, quét dependency, và cho runner CI quyền tối thiểu.</p></details>
+            <details class="k-q"><summary>Phát hiện cổng database đang mở ra internet, làm gì?</summary>
+              <p class="k-a">Khoanh vùng trước (siết security group, chuyển sang internal), giữ lại bằng chứng, đọc log để xác định phạm vi, xoay vòng credential, rồi mới gia cố và rà toàn bộ hạ tầng tìm lỗi cùng loại. Xem <a href="#inc-05">#05</a>.</p></details>
+            <details class="k-q"><summary>Ngăn sự cố do certificate hết hạn?</summary>
+              <p class="k-a">Tự động gia hạn (ACM, cert-manager), alert theo số ngày còn lại của certificate (blackbox exporter), và kiểm tra job gia hạn có thật sự chạy thành công không, vì cron gia hạn có thể hỏng âm thầm.</p></details>
+          </div>
+        </article>
+
+        <article class="inc" id="k-senior">
+          <header>
+            <p class="inc-meta"><span class="inc-num">K10</span><span class="tag">senior</span><span class="tag">hành vi</span></p>
+            <h3>Senior &amp; câu hỏi hành vi</h3>
+          </header>
+          <h4>Phải nắm</h4>
+          <ul class="k-keys">
+            <li>star</li><li>trade-off</li><li>ownership</li><li>làm việc với dev</li><li>mentoring</li><li>ưu tiên</li><li>câu hỏi ngược</li>
+          </ul>
+          <h4>Câu hay bị hỏi</h4>
+          <div class="k-qs">
+            <details class="k-q"><summary>Giới thiệu bản thân trong 2 phút?</summary>
+              <p class="k-a">Hiện đang làm gì và ở quy mô nào (hơn 20 sản phẩm, AWS, EKS, máy on-prem), hai ba kết quả có số liệu, rồi vì sao muốn vị trí này. Kết bằng một câu nối sang thứ công ty đang cần.</p></details>
+            <details class="k-q"><summary>Kể về một lần bất đồng với dev hoặc lead?</summary>
+              <p class="k-a">Đưa dữ liệu thay vì ý kiến, đề xuất một thử nghiệm nhỏ đo được, thống nhất tiêu chí đánh giá trước. Khi đã quyết thì làm hết sức, kể cả khi không theo ý mình.</p></details>
+            <details class="k-q"><summary>Nhiều việc gấp cùng lúc, ưu tiên thế nào?</summary>
+              <p class="k-a">Xếp theo ảnh hưởng tới người dùng và mức rủi ro; sự cố production luôn đi trước. Nói rõ với các bên việc gì bị dời lại và tới khi nào.</p></details>
+            <details class="k-q"><summary>Bạn giảm việc lặp lại (toil) thế nào?</summary>
+              <p class="k-a">Đo xem việc lặp lại nào tốn thời gian nhất rồi tự động hoá nó trước. Làm self-service cho dev: template pipeline, Helm chart dùng chung, runbook.</p></details>
+            <details class="k-q"><summary>Bạn hướng dẫn người mới thế nào?</summary>
+              <p class="k-a">Có runbook và tài liệu để tự đọc, pair khi xử lý sự cố thật, rồi để họ cầm lái trong khi mình ngồi kèm.</p></details>
+            <details class="k-q"><summary>Bạn có câu hỏi gì cho chúng tôi không?</summary>
+              <p class="k-a">Luôn chuẩn bị sẵn ba câu: on-call được tổ chức thế nào, quy trình từ commit tới production mất bao lâu, và món nợ kỹ thuật lớn nhất của hạ tầng hiện tại là gì.</p></details>
+          </div>
+        </article>
       </div>
     </section>
   </main>
